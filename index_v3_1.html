@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Barricade / Malefiz — en ligne (mobile)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <style>
+    :root {
+      --beige: #f5e9d3;
+      --line: #7a5a3b;
+      --text: #3a2c1f;
+      --panel: #fff6e8;
+      --accent: #8b5e34;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--beige);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif}
+    .wrap{min-height:100%;display:flex;flex-direction:column}
+    main{flex:1;display:flex;flex-direction:column;gap:12px;padding:12px}
+    .card{background:var(--panel);border:1px solid #e3d4bd;border-radius:14px;padding:14px}
+    label{font-size:14px}
+    input,select,button{font:inherit;border-radius:12px;border:1px solid #decab0;background:#fff;padding:10px 12px;color:var(--text)}
+    button{background:#cfae7e;border-color:#cfae7e;color:#2b1d12;font-weight:700}
+    button.primary{background:#b97a2a;border-color:#b97a2a;color:#fff}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    .col{display:flex;flex-direction:column;gap:8px}
+    .tag{padding:6px 10px;border-radius:999px;background:#fff;border:1px solid #e3d4bd;font-size:13px}
+    .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+    #boardWrap{background:#f7ead4;border:1px solid #e3d4bd;border-radius:14px;padding:6px}
+    #svg{touch-action:pan-x pan-y;display:block;width:100%;height:auto;background:#f4e3c7;border-radius:10px}
+    #log{height:150px;overflow:auto;background:#fff;border:1px solid #eadcc7;border-radius:10px;padding:8px;white-space:pre-wrap;font-size:12px}
+    .goal{stroke:#357a38;stroke-width:3;fill:#79c36a}
+    .node{fill:#f8efe0;stroke:#a88353;stroke-width:2}
+    .edge{stroke:#9c744a;stroke-width:4;stroke-linecap:round}
+    .barricade{fill:#000;stroke:#222;stroke-width:2}
+    .pawn{stroke:#6b4a2e;stroke-width:2}
+    .hint{fill:transparent;stroke:#c77d2a;stroke-width:3}
+    .homes circle{stroke:#6b4a2e;stroke-width:2}
+  </style>
+</head>
+<body>
+<main>
+  <section id="menu" class="card">
+    <h2>Malefiz — jouer en ligne</h2>
+    <div class="row">
+      <div class="col" style="flex:1;min-width:180px">
+        <label>Pseudo</label><input id="m_name" placeholder="ex: Camille">
+      </div>
+      <div class="col" style="width:150px">
+        <label>Couleur</label>
+        <select id="m_color">
+          <option value="red">Rouge</option>
+          <option value="blue">Bleu</option>
+          <option value="green">Vert</option>
+          <option value="yellow">Jaune</option>
+        </select>
+      </div>
+      <div class="col" style="flex:1;min-width:180px">
+        <label>Code de partie</label><input id="m_game" placeholder="ex: famille1">
+      </div>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button id="m_create" class="primary">Créer la partie</button>
+      <button id="m_join">Rejoindre la partie</button>
+    </div>
+    <div id="lobby" style="display:none;margin-top:10px">
+      <div><strong>Joueurs connectés</strong></div>
+      <div id="lobbyList" class="row"></div>
+      <div class="row" style="margin-top:10px">
+        <button id="m_start" class="primary">Démarrer la partie</button>
+      </div>
+      <div class="tag">Seul l'hôte peut démarrer • Couleurs uniques</div>
+    </div>
+  </section>
+
+  <section id="game" class="card" style="display:none">
+    <div class="row" style="align-items:center;justify-content:space-between">
+      <div class="row" style="gap:12px;align-items:center">
+        <button id="roll">🎲 Lancer le dé</button>
+        <div id="dice">Dé : —</div>
+        <div>Tour : <strong id="turn">—</strong></div>
+      </div>
+      <div class="row" id="players"></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div id="boardWrap" class="col" style="flex:1;min-width:260px">
+        <svg id="svg" viewBox="0 0 1100 1150" xmlns="http://www.w3.org/2000/svg">
+          <g id="edges"></g>
+          <g id="nodes"></g>
+          <g class="homes" id="homes"></g>
+          <g id="pieces"></g>
+        </svg>
+      </div>
+    </div>
+    <div class="col" style="margin-top:10px">
+      <div><strong>Journal</strong></div>
+      <div id="log"></div>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+
+// ⚠️ Remplace par TA config
+const firebaseConfig = {
+  apiKey: "REMPLACE_MOI",
+  authDomain: "REMPLACE_MOI.firebaseapp.com",
+  databaseURL: "https://REMPLACE_MOI-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "REMPLACE_MOI",
+  storageBucket: "REMPLACE_MOI.appspot.com",
+  messagingSenderId: "REMPLACE",
+  appId: "REMPLACE"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+// UI
+const menu = document.getElementById('menu');
+const game = document.getElementById('game');
+const mName = document.getElementById('m_name');
+const mColor = document.getElementById('m_color');
+const mGame = document.getElementById('m_game');
+const mCreate = document.getElementById('m_create');
+const mJoin = document.getElementById('m_join');
+const mStart = document.getElementById('m_start');
+const lobby = document.getElementById('lobby');
+const lobbyList = document.getElementById('lobbyList');
+const playersEl = document.getElementById('players');
+const diceEl = document.getElementById('dice'); const turnEl=document.getElementById('turn');
+
+let ME="", MYCOLOR="red", gameRef=null, IS_HOST=false;
+const COLORS = { red:"#e74b4b", blue:"#3a7bff", green:"#2fbf71", yellow:"#e5c14b" };
+
+function blankState(){return{host:"",started:false,order:[],turnIndex:0,dice:0,winner:"",players:{},colors:{red:false,blue:false,green:false,yellow:false},barricades:[]};}
+function ensure(st){ if(!st) st=blankState(); st.players=st.players||{}; st.colors=st.colors||{red:false,blue:false,green:false,yellow:false}; st.order=st.order||[]; st.barricades=st.barricades||[]; return st; }
+function log(t){ const el=document.getElementById('log'); el.textContent = t + "\\n" + el.textContent; }
+
+mCreate.onclick = async ()=>{
+  const id=mGame.value.trim(), name=mName.value.trim(), color=mColor.value;
+  if(!id||!name) return alert("Entre un pseudo et un code de partie");
+  ME=name; MYCOLOR=color; IS_HOST=true; gameRef=ref(db,"games/"+id);
+  await set(gameRef, blankState());
+  await runTransaction(gameRef,(st)=>{ st=ensure(st); st.host=name; st.players[name]={color,pawns:Array.from({length:5}).map(()=>({pos:"home",atHome:true})),won:false}; st.colors[color]=true; st.order=[name]; return st; });
+  subscribe(id); lobby.style.display="block";
+};
+mJoin.onclick = async ()=>{
+  const id=mGame.value.trim(), name=mName.value.trim(), color=mColor.value;
+  if(!id||!name) return alert("Entre un pseudo et un code de partie");
+  ME=name; MYCOLOR=color; IS_HOST=false; gameRef=ref(db,"games/"+id);
+  await runTransaction(gameRef,(st)=>{ st=ensure(st); if(st.started){alert("Partie déjà démarrée");return;} if(st.players[name]){alert("Pseudo déjà pris");return;} if(st.colors[color]){alert("Couleur déjà prise");return;} st.players[name]={color,pawns:Array.from({length:5}).map(()=>({pos:"home",atHome:true})),won:false}; st.colors[color]=true; st.order.push(name); return st; });
+  subscribe(id); lobby.style.display="block";
+};
+mStart.onclick = async ()=>{
+  if(!IS_HOST) return;
+  await runTransaction(gameRef,(st)=>{ st=ensure(st); if(Object.keys(st.players).length<2) {alert("Au moins 2 joueurs"); return;} st.started=true; st.turnIndex=0; st.dice=0; st.winner=""; st.barricades=["t5","t21","m5","m9","m13","m17","m21","py3_0","py3_3","py3_6","py1_1"]; return st; });
+};
+
+function subscribe(id){
+  onValue(ref(db,"games/"+id),(snap)=>{
+    const st=ensure(snap.val());
+    // colors disable
+    for(const o of [...mColor.options]) o.disabled = !!st.colors[o.value];
+    // lobby list
+    lobbyList.innerHTML=""; Object.entries(st.players).forEach(([n,p])=>{ const d=document.createElement('div'); d.className='tag'; d.innerHTML=`<span class="dot" style="background:${COLORS[p.color]}"></span>${n}`; lobbyList.appendChild(d); });
+    if(st.started){ menu.style.display="none"; game.style.display="block"; }
+    drawState(st); enableTurn(st); if(st._mustPlaceBarricade && st._placer===ME) enableBarricadePlacement(st);
+  });
+}
+
+// ------- Board (closer to original) -------
+const svg = document.getElementById('svg');
+const G_EDGES = document.getElementById('edges');
+const G_NODES = document.getElementById('nodes');
+const G_HOMES = document.getElementById('homes');
+const G_PIECES = document.getElementById('pieces');
+
+function L(idPrefix,x,y,n,dx=32,dy=0){ return Array.from({length:n},(_,i)=>({id:`${idPrefix}${i}`,x:x+i*dx,y:y+i*dy})); }
+
+// longer top/middle lanes (27 nodes), refined pyramid 3–5–7, loops 7 each
+const topLane = L("t",140,140,27,32,0);
+const stem = L("s", topLane[13].x, 170, 3, 0, 46);
+const py1 = L("py1_", 420, 360, 3, 96, 0);
+const py2 = L("py2_", 372, 420, 5, 96, 0);
+const py3 = L("py3_", 324, 480, 7, 96, 0);
+const mid = L("m", 140, 570, 27, 32, 0);
+const leftStem = L("ls", 140, 570, 4, 0, 60);
+const rightStem = L("rs", 140+32*26, 570, 4, 0, 60);
+const leftLoop = L("ll", 140, 570+60*3, 7, 32, 0);
+const rightLoop = L("rl", 140+32*20, 570+60*3, 7, 32, 0);
+
+const starts = {
+  green:  L("hg", 220, 900, 5, 36, 0).map(n=>({id:n.id,x:n.x,y:n.y,home:"green"})),
+  red:    L("hr", 220+36*6, 900, 5, 36, 0).map(n=>({id:n.id,x:n.x,y:n.y,home:"red"})),
+  yellow: L("hy", 220+36*12,900, 5, 36, 0).map(n=>({id:n.id,x:n.x,y:n.y,home:"yellow"})),
+  blue:   L("hb", 220+36*18,900, 5, 36, 0).map(n=>({id:n.id,x:n.x,y:n.y,home:"blue"}))
+};
+
+const nodes=[...topLane,...stem,...py1,...py2,...py3,...mid,...leftStem,...rightStem,...leftLoop,...rightLoop];
+const NODE=Object.fromEntries(nodes.map(n=>[n.id,n]));
+const adj={};
+function conn(a,b){ (adj[a]||(adj[a]=[])).push(b); (adj[b]||(adj[b]=[])).push(a); }
+
+for(let i=0;i<topLane.length-1;i++) conn(topLane[i].id,topLane[i+1].id);
+conn(`t${13}`,"s0"); conn("s0","s1"); conn("s1","s2"); conn("s2","py1_1");
+for(let i=0;i<py1.length-1;i++) conn(py1[i].id,py1[i+1].id);
+for(let i=0;i<py2.length-1;i++) conn(py2[i].id,py2[i+1].id);
+for(let i=0;i<py3.length-1;i++) conn(py3[i].id,py3[i+1].id);
+conn("py1_0","py2_1"); conn("py1_1","py2_2"); conn("py1_2","py2_3");
+conn("py2_0","py3_1"); conn("py2_1","py3_2"); conn("py2_2","py3_3"); conn("py2_3","py3_4"); conn("py2_4","py3_5");
+conn("py3_0","m8"); conn("py3_6","m18");
+for(let i=0;i<mid.length-1;i++) conn(mid[i].id,mid[i+1].id);
+conn("m0","ls0"); conn("ls0","ls1"); conn("ls1","ls2"); conn("ls2","ls3"); conn("ls3","ll0");
+conn("m26","rs0"); conn("rs0","rs1"); conn("rs1","rs2"); conn("rs2","rs3"); conn("rs3","rl0");
+for(let i=0;i<leftLoop.length-1;i++) conn(leftLoop[i].id,leftLoop[i+1].id);
+for(let i=0;i<rightLoop.length-1;i++) conn(rightLoop[i].id,rightLoop[i+1].id);
+
+// Entry nodes from homes to track
+const ENTRY = { green:"m6", red:"m13", yellow:"m20", blue:"m24" };
+
+function drawEdges(){
+  G_EDGES.innerHTML="";
+  for(const [a,ns] of Object.entries(adj)){
+    const A=NODE[a]; ns.forEach(b=>{ if(a>b) return; const B=NODE[b]; const L=document.createElementNS("http://www.w3.org/2000/svg","line"); L.setAttribute("x1",A.x); L.setAttribute("y1",A.y); L.setAttribute("x2",B.x); L.setAttribute("y2",B.y); L.setAttribute("class","edge"); G_EDGES.appendChild(L); });
+  }
+}
+function drawNodes(){
+  G_NODES.innerHTML="";
+  for(const n of nodes){ const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",n.x); c.setAttribute("cy",n.y); c.setAttribute("r","12"); c.setAttribute("class","node"); G_NODES.appendChild(c); }
+  const midNode=topLane[13];
+  const goal=document.createElementNS("http://www.w3.org/2000/svg","circle");
+  goal.setAttribute("cx",midNode.x); goal.setAttribute("cy",midNode.y-54); goal.setAttribute("r","14"); goal.setAttribute("class","goal"); NODE["GOAL"]={id:"GOAL",x:midNode.x,y:midNode.y-54}; G_NODES.appendChild(goal); conn("GOAL",`t${13}`);
+}
+function drawHomes(){
+  G_HOMES.innerHTML="";
+  const map={green:starts.green,red:starts.red,yellow:starts.yellow,blue:starts.blue};
+  Object.entries(map).forEach(([col,arr])=>{ arr.forEach(p=>{ const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",p.x); c.setAttribute("cy",p.y); c.setAttribute("r","13"); c.setAttribute("fill",COLORS[col]); G_HOMES.appendChild(c); }); });
+}
+
+function occ(players){ const s=new Set(); for(const pl of Object.values(players)){ pl.pawns.forEach(p=>{ if(!p.atHome) s.add(p.pos); }); } return s; }
+function drawState(st){
+  playersEl.innerHTML=""; Object.entries(st.players).forEach(([n,p])=>{ const d=document.createElement('div'); d.className='tag'; d.innerHTML=`<span class="dot" style="background:${COLORS[p.color]}"></span>${n}`; playersEl.appendChild(d); });
+  diceEl.textContent="Dé : "+(st.dice||"—"); turnEl.textContent=(st.order[st.turnIndex]||"—") + ((st.order[st.turnIndex]===ME)?" (à toi)":"");
+  drawEdges(); drawNodes(); drawHomes();
+  G_PIECES.innerHTML="";
+  (st.barricades||[]).forEach(id=>{ const n=NODE[id]; if(!n) return; const b=document.createElementNS("http://www.w3.org/2000/svg","circle"); b.setAttribute("cx",n.x); b.setAttribute("cy",n.y); b.setAttribute("r","11"); b.setAttribute("class","barricade"); G_PIECES.appendChild(b); });
+  for(const [name,pl] of Object.entries(st.players)){ for(let i=0;i<pl.pawns.length;i++){ const p=pl.pawns[i]; let x,y; if(p.atHome){ const S={green:starts.green[i],red:starts.red[i],yellow:starts.yellow[i],blue:starts.blue[i]}[pl.color]; x=S.x;y=S.y; } else { const n=NODE[p.pos]; if(!n) continue; x=n.x;y=n.y; } const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",x); c.setAttribute("cy",y); c.setAttribute("r","12"); c.setAttribute("fill",COLORS[pl.color]); c.setAttribute("class","pawn"); G_PIECES.appendChild(c); const t=document.createElementNS("http://www.w3.org/2000/svg","text"); t.setAttribute("x",x); t.setAttribute("y",y+4); t.setAttribute("text-anchor","middle"); t.setAttribute("font-size","10"); t.textContent=(i+1); G_PIECES.appendChild(t);} }
+}
+
+function reach(start,steps,blocked){ let cur=new Set([start]); for(let s=0;s<steps;s++){ const nxt=new Set(); for(const k of cur){ for(const n of (adj[k]||[])){ if(blocked.has(n)) continue; nxt.add(n);} } cur=nxt; } return cur; }
+
+document.getElementById('roll').onclick = async ()=>{
+  await runTransaction(gameRef,(st)=>{ st=ensure(st); if(!st.started) return st; if(st.order[st.turnIndex]!==ME) return st; st.dice=Math.floor(Math.random()*6)+1; return st; });
+};
+
+function enableTurn(st){
+  if(!st.started) return; if(st.order[st.turnIndex]!==ME || !st.dice) return;
+  const me=st.players[ME]; const occupied=occ(st.players); const blocked=new Set([...(st.barricades||[]), ...occupied]);
+  me.pawns.forEach((p,idx)=>{
+    const start = p.atHome ? ENTRY[me.color] : p.pos;
+    if(p.atHome && blocked.has(start)) return;
+    if(!p.atHome) blocked.delete(start);
+    const dests=Array.from(reach(start,st.dice,blocked)); if(start===`t${13}`&&st.dice===1) dests.push("GOAL");
+    const legal=dests.filter(k=>k==="GOAL"||NODE[k]);
+    let x,y; if(p.atHome){ const S={green:starts.green[idx],red:starts.red[idx],yellow:starts.yellow[idx],blue:starts.blue[idx]}[me.color]; x=S.x;y=S.y; } else { const n=NODE[p.pos]; x=n.x;y=n.y; }
+    const o=document.createElementNS("http://www.w3.org/2000/svg","circle"); o.setAttribute("cx",x); o.setAttribute("cy",y); o.setAttribute("r","16"); o.setAttribute("class","hint"); o.onclick=()=>{ clearHints(); showTargets(legal,(dest)=>movePawn(idx,dest)); }; G_PIECES.appendChild(o);
+  });
+}
+function clearHints(){ [...svg.querySelectorAll(".hint")].forEach(n=>n.remove()); }
+function showTargets(keys,onPick){ keys.forEach(k=>{ const n=NODE[k]||NODE["GOAL"]; const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",n.x); c.setAttribute("cy",n.y); c.setAttribute("r","16"); c.setAttribute("class","hint"); c.onclick=()=>onPick(k); G_PIECES.appendChild(c); }); }
+
+function movePawn(idx,dest){
+  runTransaction(gameRef,(st)=>{
+    st=ensure(st); if(!st.started) return st; if(st.order[st.turnIndex]!==ME) return st;
+    const me=st.players[ME]; const p=me.pawns[idx]; const start=p.atHome?ENTRY[me.color]:p.pos;
+    const occupied=occ(st.players); const blocked=new Set([...(st.barricades||[]),...occupied]);
+    if(p.atHome && blocked.has(start)) return st; if(!p.atHome) blocked.delete(start);
+    const dests=Array.from(reach(start,st.dice,blocked)); if(start===`t${13}`&&st.dice===1) dests.push("GOAL"); if(!dests.includes(dest)) return st;
+    // capture
+    for(const [n,pl] of Object.entries(st.players)){ if(n===ME) continue; pl.pawns.forEach(pp=>{ if(!pp.atHome && pp.pos===dest){ pp.atHome=true; pp.pos="home"; } }); }
+    p.atHome=false; p.pos=dest;
+    if(dest==="GOAL"){ st.winner=ME; }
+    const bi=(st.barricades||[]).indexOf(dest);
+    if(bi>=0){ st.barricades.splice(bi,1); st._mustPlaceBarricade=true; st._placer=ME; }
+    else { st.dice=0; if(!st.winner) st.turnIndex=(st.turnIndex+1)%st.order.length; }
+    return st;
+  });
+  clearHints();
+}
+function enableBarricadePlacement(st){
+  const occupied=occ(st.players);
+  const choices=Object.keys(NODE).filter(id=>NODE[id]&&id!=="GOAL"&&!occupied.has(id));
+  showTargets(choices,(dest)=>{
+    runTransaction(gameRef,(S)=>{ S=ensure(S); if(!S._mustPlaceBarricade||S._placer!==ME) return S; if(!NODE[dest]||dest==="GOAL") return S; if(occ(S.players).has(dest)) return S; S.barricades.push(dest); S._mustPlaceBarricade=false; S._placer=""; S.dice=0; if(!S.winner) S.turnIndex=(S.turnIndex+1)%S.order.length; return S; });
+    clearHints();
+  });
+  log("Place une barricade (pion noir) sur une case libre.");
+}
+
+// initial draw
+drawEdges(); drawNodes(); drawHomes();
+</script>
+</body>
+</html>
