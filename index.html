@@ -89,14 +89,23 @@ import { getDatabase, ref, set, onValue, runTransaction } from "https://www.gsta
 
 // ⚠️ COLLE ICI TA CONFIG
 const firebaseConfig = {
-  apiKey: "REMPLACE_MOI",
-  authDomain: "REMPLACE_MOI.firebaseapp.com",
-  databaseURL: "https://REMPLACE_MOI-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "REMPLACE_MOI",
-  storageBucket: "REMPLACE_MOI.appspot.com",
-  messagingSenderId: "REMPLACE",
-  appId: "REMPLACE"
+
+  apiKey: "AIzaSyDqZOF5bsuzH7dH3TvQiY9JknZWXYJsEE4",
+
+  authDomain: "barricade-en-ligne.firebaseapp.com",
+
+  databaseURL: "https://barricade-en-ligne-default-rtdb.europe-west1.firebasedatabase.app",
+
+  projectId: "barricade-en-ligne",
+
+  storageBucket: "barricade-en-ligne.firebasestorage.app",
+
+  messagingSenderId: "1094029683667",
+
+  appId: "1:1094029683667:web:e3d6b9ad3b44b337d29d26"
+
 };
+
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
