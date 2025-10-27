@@ -228,7 +228,15 @@ let currentSelect = null;
 function addOriginHalo(x,y,onclick){ const o=document.createElementNS("http://www.w3.org/2000/svg","circle"); o.setAttribute("cx",x); o.setAttribute("cy",y); o.setAttribute("r","26"); o.setAttribute("class","hint-origin"); o.onclick = onclick; G_UI.appendChild(o); }
 function addSelectRing(x,y){ const s=document.createElementNS("http://www.w3.org/2000/svg","circle"); s.setAttribute("cx",x); s.setAttribute("cy",y); s.setAttribute("r","30"); s.setAttribute("class","select"); s.setAttribute("data-role","select-ring"); G_UI.appendChild(s); }
 function clearTargets(){ [...svg.querySelectorAll(".hint-target,[data-role='select-ring']")].forEach(n=>n.remove()); }
-function addTargetHalo(x,y,onclick){ const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",x); c.setAttribute("cy",y); c.setAttribute("r","26"); c.setAttribute("class","hint-target"); c.addEventListener('pointerdown', (ev)=>{ev.stopPropagation(); ev.preventDefault(); onclick();}, {passive:false}); c.addEventListener('click', onclick); c.addEventListener('touchstart', (ev)=>{ev.stopPropagation(); ev.preventDefault(); onclick();}, {passive:false}); G_UI.appendChild(c); }
+function addTargetHalo(x, y, onclick){
+  const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  c.setAttribute("cx", x);
+  c.setAttribute("cy", y);
+  c.setAttribute("r", "26");
+  c.setAttribute("class", "hint-target");
+  onTap(c, onclick);
+  G_UI.appendChild(c);
+}
 
 function enableTurn(st){ if(!st.started) return; if(st.order[st.turnIndex]!==ME || !st.dice) return;
   const me=st.players[ME]; if(!me) return;
