@@ -88,13 +88,21 @@ import { getDatabase, ref, set, onValue, runTransaction } from "https://www.gsta
 
 // ⚠️ COLLE ICI TA CONFIG
 const firebaseConfig = {
-  apiKey: "REMPLACE_MOI",
-  authDomain: "REMPLACE_MOI.firebaseapp.com",
-  databaseURL: "https://REMPLACE_MOI-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "REMPLACE_MOI",
-  storageBucket: "REMPLACE_MOI.appspot.com",
-  messagingSenderId: "REMPLACE",
-  appId: "REMPLACE"
+
+  apiKey: "AIzaSyDqZOF5bsuzH7dH3TvQiY9JknZWXYJsEE4",
+
+  authDomain: "barricade-en-ligne.firebaseapp.com",
+
+  databaseURL: "https://barricade-en-ligne-default-rtdb.europe-west1.firebasedatabase.app",
+
+  projectId: "barricade-en-ligne",
+
+  storageBucket: "barricade-en-ligne.firebasestorage.app",
+
+  messagingSenderId: "1094029683667",
+
+  appId: "1:1094029683667:web:e3d6b9ad3b44b337d29d26"
+
 };
 
 const app = initializeApp(firebaseConfig);
@@ -436,5 +444,104 @@ function endPtr(e){ pointers.delete(e.pointerId); if(pointers.size<2) pinchPrevD
 svg.addEventListener('pointerup', endPtr); svg.addEventListener('pointercancel', endPtr); svg.addEventListener('pointerleave', endPtr);
 
 </script>
+  <script type="module">
+/* Auto-skip logique :
+   Si aucun pion du joueur actif n'a de coup légal selon le dé et les barricades,
+   le tour passe automatiquement au joueur suivant.
+*/
+import { getDatabase, ref, runTransaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+
+(function(){
+
+  function occSet(players){
+    const out = new Set();
+    for (const pl of Object.values(players||{})){
+      for(const p of (pl.pawns||[])){
+        if(!p.atHome) out.add(p.pos);
+      }
+    }
+    return out;
+  }
+
+  function myOccSet(me){
+    const out = new Set();
+    for(const p of (me.pawns||[])){
+      if(!p.atHome) out.add(p.pos);
+    }
+    return out;
+  }
+
+  function hasAnyLegalMove(st){
+    if(!st || !st.started) return false;
+    const meName = st.order?.[st.turnIndex];
+    if(!meName) return false;
+    const me = st.players?.[meName];
+    const dice = st.dice|0;
+    if(dice <= 0) return false;
+
+    const barrSet = new Set(st.barricades || []);
+    const myOcc = myOccSet(me);
+    const allOcc = occSet(st.players||{});
+    const entryId = (window.ENTRY||{})[me.color];
+
+    for (const p of (me.pawns || [])) {
+      if (p.atHome) {
+        const steps = dice - 1; // entrée = 1
+        if (steps === 0) {
+          if (!allOcc.has(entryId) && !barrSet.has(entryId)) return true;
+        } else if (steps > 0) {
+          const tg = window.exactReachRules(entryId, steps, barrSet, myOcc);
+          if (tg && tg.length) return true;
+        }
+      } else {
+        const tg = window.exactReachRules(p.pos, dice, barrSet, myOcc);
+        if (tg && tg.length) return true;
+      }
+    }
+    return false;
+  }
+
+  async function passTurnIfStuck(st){
+    try{
+      const meName = st.order?.[st.turnIndex];
+      if (!meName || meName !== window.ME) return;
+      if (st._mustPlaceBarricade) return;
+      if (!st.dice || st.dice <= 0) return;
+
+      if (hasAnyLegalMove(st)) return; // au moins un coup possible
+
+      const gameId = (window.gameRef && window.gameRef.key)
+        || (document.getElementById('m_game')?.value || "").trim();
+      if (!gameId) return;
+
+      const db = getDatabase();
+      const gameRef = ref(db, "games/" + gameId);
+      await runTransaction(gameRef, cur => {
+        if(!cur || !cur.started) return cur;
+        const curName = cur.order?.[cur.turnIndex];
+        if(curName !== meName) return cur;
+        if(cur._mustPlaceBarricade) return cur;
+        if(!cur.dice || cur.dice<=0) return cur;
+
+        // Passe le tour
+        cur.dice = 0;
+        cur.turnIndex = ((cur.turnIndex||0) + 1) % (cur.order?.length || 1);
+        return cur;
+      });
+      console.log("[autoSkip logic] Aucun coup légal -> tour passé automatiquement.");
+    } catch(e){
+      console.error("[autoSkip logic] Erreur passage de tour:", e);
+    }
+  }
+
+  const oldEnableTurn = window.enableTurn;
+  window.enableTurn = function(st){
+    oldEnableTurn(st);
+    setTimeout(()=> passTurnIfStuck(st), 40);
+  };
+
+})();
+</script>
+
 </body>
 </html>
