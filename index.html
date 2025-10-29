@@ -440,37 +440,6 @@ svg.addEventListener('pointerup', endPtr); svg.addEventListener('pointercancel',
 
 </script>
 
-  <script>
-window.addEventListener("load", ()=>{
-
-  // Hook : on étend enableTurn sans le casser
-  const oldEnableTurn = window.enableTurn;
-  window.enableTurn = function(st){
-    // Appel original pour afficher les halos normalement
-    oldEnableTurn(st);
-
-    // Petit délai pour laisser le DOM finir de placer les halos
-    setTimeout(()=>{
-      const halos = document.querySelectorAll("circle[data-click]");
-      if(halos.length === 0){
-        console.log("Aucun mouvement possible, tour passé automatiquement !");
-        // On passe le tour au joueur suivant
-        nextPlayerTurn(st);
-      }
-    }, 200);
-  };
-
-  // Fonction utilitaire : passer le tour au joueur suivant
-  function nextPlayerTurn(st){
-    const order = Object.keys(st.players);
-    const idx = order.indexOf(st.turn);
-    const next = order[(idx + 1) % order.length];
-
-    firebase.database().ref(st.room + "/turn").set(next);
-  }
-
-});
-</script>
 
 </body>
 </html>
