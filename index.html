@@ -556,7 +556,7 @@ if (__winClose) __winClose.onclick = ()=>{ __winOverlay.style.display = 'none'; 
 function __showVictoryOverlay(__winnerName){
   if (!__winOverlay || !__winTitle || !__winMsg) return;
   __winTitle.textContent = `Victoire de ${__winnerName}`;
-  __winMsg.textContent = "Si Camille a gagné, c'est logique, elle est trop forte. Si elle a perdu, c'est simplement que vous avez eu de la chance";
+  __winMsg.textContent = "Si Camille a gagné, c'est logique, elle est trop forte. Si elle a perdu, sachez qu'elle est en train de vous insulter";
   __winOverlay.style.display = 'flex';
   const __roll = document.getElementById('rollBtn');
   if (__roll) __roll.disabled = true;
