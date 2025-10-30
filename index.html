@@ -526,6 +526,87 @@ svg.addEventListener('pointermove', e=>{ if(!pointers.has(e.pointerId)) return; 
 function endPtr(e){ pointers.delete(e.pointerId); if(pointers.size<2) pinchPrevDist=null; }
 svg.addEventListener('pointerup', endPtr); svg.addEventListener('pointercancel', endPtr); svg.addEventListener('pointerleave', endPtr);
 
+// === Victoire : détection + affichage (ajout non intrusif) ===
+
+// Constante : la dernière case en haut (déjà dans tes NODES)
+const TOP_NODE_ID = "n112"; // correspond à la node avec y=120, tout en haut :contentReference[oaicite:0]{index=0}
+
+// Elements overlay
+const winOverlay = document.getElementById('winOverlay');
+const winTitle   = document.getElementById('winTitle');
+const winMsg     = document.getElementById('winMsg');
+const winClose   = document.getElementById('winClose');
+winClose.onclick = ()=>{ winOverlay.style.display = 'none'; };
+
+// Petite utilité : afficher l’overlay et bloquer les clics de jeu
+function showVictoryOverlay(winnerName){
+  winTitle.textContent = `Victoire de ${winnerName}`;
+  // Le texte demandé (inchangé) :
+  winMsg.textContent = "Si Camille a gagné, c'est logique, elle est trop forte. Si elle a perdu, c'est simplement que vous avez eu de la chance";
+  winOverlay.style.display = 'flex';
+  // Désactiver le bouton de dé
+  try { rollBtn.disabled = true; } catch(e){}
+}
+
+// On ajoute un second abonné Firebase dédié à la victoire (pour ne pas toucher au code existant)
+let _victorySubAttached = false;
+function attachVictoryWatcher(gameId){
+  if(_victorySubAttached || !gameId) return;
+  _victorySubAttached = true;
+
+  const gamePath = "games/"+gameId;
+  onValue(ref(db, gamePath), (snap)=>{
+    const st = ensure(snap.val());
+    if(!st) return;
+
+    // 1) Si un gagnant est déjà enregistré -> on affiche simplement
+    if(st.winner && st.winner.length){
+      showVictoryOverlay(st.winner);
+      return;
+    }
+
+    // 2) Sinon, on regarde si un pion a atteint TOP_NODE_ID
+    //    Si oui, on enregistre le gagnant (le pseudo du joueur de cette couleur).
+    //    NB: ton state a déjà un champ "winner" prévu dans blankState() :contentReference[oaicite:1]{index=1}
+    let reachedBy = "";
+    for(const [name, pl] of Object.entries(st.players || {})){
+      if((pl.pawns||[]).some(p => !p.atHome && p.pos === TOP_NODE_ID)){
+        reachedBy = name; // "pseudo de la couleur" = le pseudo du joueur qui possède la couleur gagnante
+        break;
+      }
+    }
+
+    if(reachedBy){
+      // On fige le gagnant une seule fois côté base
+      runTransaction(ref(db, gamePath), (cur)=>{
+        cur = ensure(cur);
+        if(!cur.winner || cur.winner===""){
+          cur.winner = reachedBy;    // enregistre le pseudo gagnant
+          cur.dice = 0;              // gèle le tour
+        }
+        return cur;
+      });
+    }
+  });
+}
+
+// Sans toucher aux handlers existants, on se greffe via des listeners additionnels sur les boutons
+// pour attacher notre watcher dès que l’ID de partie est connu.
+mCreate.addEventListener('click', ()=>{
+  const id = mGame.value.trim();
+  if(id) setTimeout(()=> attachVictoryWatcher(id), 0);
+});
+mJoin.addEventListener('click', ()=>{
+  const id = mGame.value.trim();
+  if(id) setTimeout(()=> attachVictoryWatcher(id), 0);
+});
+
+// Cas où la partie est déjà lancée (ex: rechargement) : si l’input contient un code, on accroche aussi
+if(mGame && mGame.value && mGame.value.trim()){
+  attachVictoryWatcher(mGame.value.trim());
+}
+
+  
 </script>
 </body>
 </html>
