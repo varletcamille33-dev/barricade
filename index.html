@@ -2,85 +2,104 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Malefiz — Édition Bois & Moderne</title>
+  <title>Malefiz — Design Premium</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* --- DESIGN AMÉLIORÉ --- */
+    /* --- NOUVEAU DESIGN MODERNE & BOIS --- */
     :root { 
-      /* Fond général : Effet bois sombre */
+      /* Fond de la page : Table en bois sombre et chaleureux */
       --bg-wood: radial-gradient(circle at center, #5e4b35 0%, #2e2315 100%);
       
-      /* Couleurs de l'interface */
+      /* Textes */
       --text-main: #2d241e;
-      --panel-bg: rgba(255, 248, 235, 0.95); /* Effet papier calque */
+      --text-light: #6b5a4e;
+      
+      /* Cartes (Menus) : Effet papier épais de qualité */
+      --panel-bg: #fffaf0;
       --panel-border: #dccab6;
+      --panel-shadow: 0 12px 24px rgba(0,0,0,0.3);
+      
+      /* Le Plateau */
+      --board-bg: #f6e8c9;
+      --board-frame: #6b4c30; /* Cadre bois */
       
       /* Boutons */
       --btn-gold: #c07d2d;
       --btn-gold-hover: #d6903e;
       --btn-text: #fff;
-      
-      /* Le plateau (couleurs originales conservées pour les nodes, mais fond amélioré) */
-      --board-bg: #f6e8c9;
-      --board-frame: #6b4c30;
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      background: var(--bg-wood); /* Fond bois sombre */
+      background: var(--bg-wood);
       color: var(--text-main);
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
-      padding-bottom: 20px;
+      padding-bottom: 30px;
     }
 
-    /* --- CARTES (Menus) --- */
+    /* --- STYLE DES CARTES (MENU & JEU) --- */
     .card {
       background: var(--panel-bg);
       border: 1px solid var(--panel-border);
-      border-radius: 16px;
-      padding: 20px;
-      margin: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4); /* Belle ombre */
+      border-radius: 18px;
+      padding: 24px;
+      margin: 20px 10px;
+      box-shadow: var(--panel-shadow);
       width: 95%;
       max-width: 600px;
-      backdrop-filter: blur(4px);
+      transition: transform 0.2s ease;
     }
 
-    h3 { margin-top: 0; color: #5a3c20; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
+    h3 { 
+      margin-top: 0; 
+      color: #4a3b2a; 
+      font-weight: 800; 
+      text-transform: uppercase; 
+      letter-spacing: 1px;
+      border-bottom: 2px solid #e6d6c1;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
 
     .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-    .col { display: flex; flex-direction: column; gap: 5px; }
+    .col { display: flex; flex-direction: column; gap: 6px; }
 
-    /* --- INPUTS & BOUTONS --- */
+    label { font-size: 0.85rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; }
+
+    /* --- INPUTS & SELECTS --- */
     input, select {
       font: inherit;
       border-radius: 10px;
       border: 2px solid #e0d0b8;
       background: #fff;
-      padding: 10px 12px;
+      padding: 12px;
       color: #333;
       outline: none;
+      font-weight: 500;
       transition: border-color 0.2s;
     }
     input:focus, select:focus { border-color: var(--btn-gold); }
 
+    /* --- BOUTONS MODERNISÉS --- */
     button {
       font: inherit;
       border-radius: 10px;
       border: none;
-      padding: 12px 20px;
+      padding: 12px 22px;
       font-weight: 700;
       cursor: pointer;
       background: #e6d6c1;
       color: #5a4633;
-      box-shadow: 0 4px 0 #cfbfa0; /* Effet 3D */
-      transition: transform 0.1s, box-shadow 0.1s;
+      box-shadow: 0 4px 0 #bda68d; /* Effet 3D subtil */
+      transition: transform 0.1s, background 0.2s;
+      text-transform: uppercase;
+      font-size: 0.9rem;
     }
     button:active { transform: translateY(3px); box-shadow: none; }
     button:hover { background: #efe2d0; }
@@ -93,49 +112,49 @@
     button.primary:hover { background: var(--btn-gold-hover); }
     button:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; transform: translateY(2px); }
 
-    /* --- PLATEAU DE JEU --- */
+    /* --- CADRE DU PLATEAU --- */
     #game { max-width: 1150px; }
-
+    
     #wrap {
       overflow: hidden;
-      border-radius: 12px;
-      /* Cadre effet bois épais autour du jeu */
-      border: 12px solid var(--board-frame); 
+      border-radius: 14px;
+      border: 14px solid var(--board-frame);
       background: var(--board-bg);
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
-      margin-top: 10px;
+      /* Ombre interne pour effet de profondeur */
+      box-shadow: inset 0 0 25px rgba(0,0,0,0.2);
+      margin-top: 15px;
+      position: relative;
     }
 
     #svg { touch-action: none; display: block; width: 100%; height: 70vh; }
 
-    /* --- SVG ELEMENTS (Tes couleurs originales) --- */
+    /* --- ELEMENTS GRAPHIQUES (SVG) --- */
     .edge { stroke: #9c744a; stroke-width: 4; stroke-linecap: round; opacity: .9; }
-    .node { fill: #f8efe0; stroke: #a88353; stroke-width: 2; }
-    .barricade { fill: #000; stroke: #222; stroke-width: 2; }
-    .pawn { stroke: #6b4a2e; stroke-width: 2; }
+    .node { fill: #fffdf5; stroke: #a88353; stroke-width: 2; }
+    .barricade { fill: #1a1a1a; stroke: #000; stroke-width: 2; }
+    .pawn { stroke: rgba(0,0,0,0.3); stroke-width: 2; }
     
-    /* Halos interactifs */
     .hint-origin { fill: transparent; stroke: #a86a1f; stroke-width: 3; cursor: pointer; pointer-events: all; animation: pulse 1.5s infinite; }
     .hint-target { fill: transparent; stroke: #c77d2a; stroke-width: 3; cursor: pointer; pointer-events: all; stroke-dasharray: 5,3; }
     .select { fill: transparent; stroke: #ff9800; stroke-width: 4; pointer-events: none; }
     
-    @keyframes pulse { 0% { stroke-width: 3; opacity: 1; } 50% { stroke-width: 5; opacity: 0.6; } 100% { stroke-width: 3; opacity: 1; } }
+    @keyframes pulse { 0% { stroke-width: 3; opacity: 1; } 50% { stroke-width: 5; opacity: 0.7; } 100% { stroke-width: 3; opacity: 1; } }
 
-    /* --- INFOS & LOGS --- */
-    .tag { padding: 6px 12px; border-radius: 20px; background: #fff; border: 1px solid #e3d4bd; font-size: 13px; font-weight: bold; display: flex; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    /* --- UI ELEMENTS --- */
+    .tag { padding: 6px 12px; border-radius: 20px; background: #fff; border: 1px solid #e3d4bd; font-size: 13px; font-weight: 700; display: flex; align-items: center; }
     .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0,0,0,0.1); }
     
-    #log { height: 160px; overflow: auto; background: #fff; border: 2px solid #e0d0b8; border-radius: 12px; padding: 10px; white-space: pre-wrap; font-size: 13px; font-family: monospace; color: #555; margin-top: 5px; }
-    .notice { font-size: 13px; opacity: .9; margin-left: 8px; color: #d35400; font-weight: 600; }
+    #log { height: 160px; overflow: auto; background: #fff; border: 2px solid #e0d0b8; border-radius: 12px; padding: 10px; white-space: pre-wrap; font-size: 12px; font-family: monospace; color: #555; margin-top: 5px; }
+    .notice { font-size: 13px; color: #d35400; font-weight: 600; margin-left: 8px; }
 
-    #dice { font-weight: 800; font-size: 1.1rem; color: var(--btn-gold); background: #fff; padding: 5px 10px; border-radius: 8px; border: 1px solid #e0d0b8; }
-
-    /* Overlay Victoire */
-    #winOverlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.65); backdrop-filter: blur(3px); z-index: 9999; }
-    #winBox { background: #fff6e8; border: 4px solid var(--btn-gold); border-radius: 20px; padding: 30px; max-width: 520px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-    #winBox h2 { margin: 0 0 15px; color: var(--btn-gold); font-size: 2rem; }
-    #winBox p { font-size: 1.1rem; line-height: 1.5; }
-    #winClose { margin-top: 20px; background: var(--text-main); color: #fff; border: none; }
+    #dice { font-weight: 800; font-size: 1.1rem; background: #fff; padding: 8px 14px; border-radius: 10px; border: 2px solid #e0d0b8; color: var(--btn-gold); }
+    
+    /* --- OVERLAY VICTOIRE --- */
+    #winOverlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(3px); z-index: 9999; }
+    #winBox { background: #fff; border: 4px solid var(--btn-gold); border-radius: 20px; padding: 30px; max-width: 520px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+    #winBox h2 { margin: 0 0 10px; color: var(--btn-gold); font-size: 2rem; }
+    #winBox p { font-size: 1.1rem; line-height: 1.5; color: #333; }
+    #winClose { margin-top: 20px; background: #333; color: #fff; border: none; box-shadow: none; }
 
   </style>
 </head>
@@ -155,17 +174,17 @@
       <label>Code de partie</label><input id="m_game" placeholder="ex: famille1">
     </div>
   </div>
-  <div class="row" style="margin-top:15px; justify-content:center;">
+  <div class="row" style="margin-top:15px; justify-content: center;">
     <button id="m_create" class="primary">✨ Créer la partie</button>
     <button id="m_join">🚀 Rejoindre</button>
   </div>
-  <div id="lobby" style="display:none;margin-top:15px; border-top: 2px dashed #e0d0b8; padding-top:15px;">
-    <div style="margin-bottom:8px; color:#888; font-weight:bold;">Joueurs connectés :</div>
+  <div id="lobby" style="display:none;margin-top:20px; border-top: 2px dashed #e0d0b8; padding-top:15px;">
+    <div style="margin-bottom:10px; font-weight:700; color:#888;">Joueurs dans le salon :</div>
     <div id="lobbyList" class="row" style="gap:6px"></div>
-    <div class="row" style="margin-top:15px;align-items:center;gap:10px; justify-content:center;">
-      <button id="m_start" class="primary" style="font-size:1.1rem; padding: 12px 30px;">▶️ Démarrer</button>
+    <div class="row" style="margin-top:20px; align-items:center; gap:10px; justify-content: center;">
+      <button id="m_start" class="primary" style="font-size:1.1rem; padding: 14px 30px;">▶️ Démarrer la partie</button>
     </div>
-    <div style="text-align:center; margin-top:5px;"><span class="notice" style="color:#777; font-weight:normal;">Seul l'hôte peut démarrer. Minimum 2 joueurs.</span></div>
+    <div style="text-align:center; margin-top:8px;"><span class="notice" style="color:#999; font-weight:400;">Seul l'hôte peut démarrer. Minimum 2 joueurs.</span></div>
   </div>
 </section>
 
@@ -191,10 +210,18 @@
   </div>
 
   <div class="col" style="margin-top:15px">
-    <div style="font-weight:bold; color:#888;">Journal de bord</div>
+    <div style="font-weight:700; color:#888">Journal de bord</div>
     <div id="log"></div>
   </div>
 </section>
+
+<div id="winOverlay" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+  <div id="winBox">
+    <h2 id="winTitle">Victoire !</h2>
+    <p id="winMsg">Si Camille a gagné, c'est logique, elle est trop forte. Si elle a perdu, c'est simplement que vous avez eu de la chance</p>
+    <button id="winClose">OK</button>
+  </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
@@ -309,17 +336,4 @@ function subscribe(id){
 function drawEdges(){ G_E.innerHTML=""; for(const [a,ns] of Object.entries(ADJ_SAFE)){ const A=NODE_BY_ID[a]; if(!A) continue; ns.forEach(b=>{ if(a>b) return; const B=NODE_BY_ID[b]; if(!B) return; const L=document.createElementNS("http://www.w3.org/2000/svg","line"); L.setAttribute("x1",A.x); L.setAttribute("y1",A.y); L.setAttribute("x2",B.x); L.setAttribute("y2",B.y); L.setAttribute("class","edge"); G_E.appendChild(L); }); } }
 function drawNodes(){ G_N.innerHTML=""; for(const n of NODES){ const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",n.x); c.setAttribute("cy",n.y); c.setAttribute("r","22"); c.setAttribute("class","node"); G_N.appendChild(c); } }
 function drawHomes(){ G_H.innerHTML=""; for(const [col,arr] of Object.entries(HOMES)){ arr.forEach(p=>{ const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",p.x); c.setAttribute("cy",p.y); c.setAttribute("r","18"); c.setAttribute("fill",COLORS[col]); G_H.appendChild(c); }); } }
-function drawBarricades(list){ (list||[]).forEach(id=>{ const n=NODE_BY_ID[id]; if(!n) return; const b=document.createElementNS("http://www.w3.org/2000/svg","circle"); b.setAttribute("cx",n.x); b.setAttribute("cy",n.y); b.setAttribute("r","18"); b.setAttribute("class","barricade"); G_P.appendChild(b); }); }
-
-function occByPlayer(players){ const map = new Map(); for(const [name,pl] of Object.entries(players)){ pl.pawns.forEach(p=>{ if(!p.atHome) map.set(p.pos, name); }); } return map; }
-function occSet(players){ return new Set([...occByPlayer(players).keys()]); }
-
-function drawPawns(st){ for(const [name,pl] of Object.entries(st.players)){ for(let i=0;i<pl.pawns.length;i++){ const p=pl.pawns[i]; let x,y; if(p.atHome){ const arr=HOMES[pl.color]; const spot=arr[Math.min(i,arr.length-1)]; x=spot.x; y=spot.y; } else { const n=NODE_BY_ID[p.pos]; if(!n) continue; x=n.x; y=n.y; } const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",x); c.setAttribute("cy",y); c.setAttribute("r","21"); c.setAttribute("fill",COLORS[pl.color]); c.setAttribute("class","pawn"); G_P.appendChild(c); const t=document.createElementNS("http://www.w3.org/2000/svg","text"); t.setAttribute("x",x); t.setAttribute("y",y+4); t.setAttribute("text-anchor","middle"); t.setAttribute("font-size","10"); t.textContent=(i+1); G_P.appendChild(t); } } }
-
-function drawState(st){ 
-  playersEl.innerHTML=""; Object.entries(st.players).forEach(([n,p])=>{ const d=document.createElement('div'); d.className='tag'; d.innerHTML=`<span class="dot" style="background:${COLORS[p.color]}"></span>${n}`; playersEl.appendChild(d); });
-  diceEl.textContent="Dé : "+(st.dice||"—"); 
-  const myTurn = st.order[st.turnIndex]===ME; turnEl.textContent=(st.order[st.turnIndex]||"—")+(myTurn?" (à toi)":""); 
-  G_E.innerHTML=""; G_N.innerHTML=""; G_H.innerHTML=""; G_P.innerHTML=""; G_UI.innerHTML="";
-  const mergedBarr = Array.from(new Set([...(st.barricades||[]), ...LOCAL_BARR_ADDS]));
-  drawEdges(); drawNodes(); drawHomes(); drawBar
+function drawBarricades(list){ (list||[]).forEach(id=>{ const n=NODE_BY_ID[id]; if(!n) return; const b=document.createElementNS("http://
