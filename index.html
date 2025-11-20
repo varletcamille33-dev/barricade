@@ -288,17 +288,41 @@ function autoSkipIfStuck(st) {
 }
 
 
-
-
 // Roll: only once per turn, not during barricade placement
 rollBtn.onclick = async ()=>{ await runTransaction(gameRef,(st)=>{ st=ensure(st); if(!st.started) return st; if(st.order[st.turnIndex]!==ME) return st; if(st._mustPlaceBarricade) return st; if(st.dice && st.dice>0) return st; st.dice=Math.floor(Math.random()*6)+1; return st; }); };
 
 let currentSelect = null;
 
-function addOriginHalo(x,y,onclick){ const o=document.createElementNS("http://www.w3.org/2000/svg","circle"); o.setAttribute("cx",x); o.setAttribute("cy",y); o.setAttribute("r","26"); o.setAttribute("class","hint-origin"); o.onclick = onclick; G_UI.appendChild(o); }
+// --- MODIFICATIONS APPLIQUÉES ICI ---
+function addOriginHalo(x,y,onclick){ 
+  const o=document.createElementNS("http://www.w3.org/2000/svg","circle"); 
+  o.setAttribute("cx",x); 
+  o.setAttribute("cy",y); 
+  o.setAttribute("r","26"); 
+  o.setAttribute("class","hint-origin"); 
+  o.onclick = onclick;
+  // Ajout des gestionnaires pour garantir le clic sur desktop
+  o.onmousedown = (e) => { e.preventDefault(); e.stopPropagation(); onclick(); };
+  o.ontouchstart = (e) => { e.preventDefault(); e.stopPropagation(); onclick(); };
+  G_UI.appendChild(o); 
+}
+
 function addSelectRing(x,y){ const s=document.createElementNS("http://www.w3.org/2000/svg","circle"); s.setAttribute("cx",x); s.setAttribute("cy",y); s.setAttribute("r","30"); s.setAttribute("class","select"); s.setAttribute("data-role","select-ring"); G_UI.appendChild(s); }
 function clearTargets(){ [...svg.querySelectorAll(".hint-target,[data-role='select-ring']")].forEach(n=>n.remove()); }
-function addTargetHalo(x,y,onclick){ const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",x); c.setAttribute("cy",y); c.setAttribute("r","26"); c.setAttribute("class","hint-target"); c.onclick = onclick; G_UI.appendChild(c); }
+
+function addTargetHalo(x,y,onclick){ 
+  const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); 
+  c.setAttribute("cx",x); 
+  c.setAttribute("cy",y); 
+  c.setAttribute("r","26"); 
+  c.setAttribute("class","hint-target"); 
+  c.onclick = onclick;
+  // Ajout des gestionnaires pour garantir le clic sur desktop
+  c.onmousedown = (e) => { e.preventDefault(); e.stopPropagation(); onclick(); };
+  c.ontouchstart = (e) => { e.preventDefault(); e.stopPropagation(); onclick(); };
+  G_UI.appendChild(c); 
+}
+// --- FIN DES MODIFICATIONS ---
 
 function addTargetHaloWithLabel(x,y,label,onclick){
   addTargetHalo(x,y,onclick);
@@ -737,7 +761,6 @@ document.addEventListener('visibilitychange', ()=>{
 // === END: clearTargets wrapper ===
 
 </script>
-<!-- BEGIN: Victory Overlay (non-intrusive add) -->
 <style>
   #winOverlay{
     position:fixed; inset:0; display:none; align-items:center; justify-content:center;
@@ -758,6 +781,5 @@ document.addEventListener('visibilitychange', ()=>{
     <button id="winClose">OK</button>
   </div>
 </div>
-<!-- END: Victory Overlay (non-intrusive add) -->
 </body>
 </html>
