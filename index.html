@@ -14,7 +14,7 @@
       --text-main: #3b2a16;     /* Texte marron foncé */
       --text-muted: #8d7a60;    /* Texte beige/gris */
       --accent: #b97a2a;        /* Marron caramel (boutons) */
-      --board-bg: #cfae7e;      /* Fond du plateau (texture bois clair) */
+      --board-bg: #e8e4dc;      /* Fond du plateau (texture bois clair - CORRIGÉ) */
       --line-color: #795d3e;    /* Lignes marrons */
       --shadow-soft: 0 4px 10px rgba(0, 0, 0, 0.1);
       --shadow-panel: 0 2px 5px rgba(0, 0, 0, 0.08);
@@ -346,6 +346,12 @@ const BARRS = ["n23", "n27", "n31", "n35", "n39", "n61", "n65", "n72", "n75", "n
 
 const NODE_BY_ID = Object.fromEntries(NODES.map(n=>[n.id,n]));
 const ADJ_SAFE = new Proxy(ADJ, { get: (t, k)=> t[k] || [] });
+
+// --- CONSTANTES POUR LE ZOOM (Correction) ---
+const INITIAL_WIDTH = 1090;
+const INITIAL_HEIGHT = 1300;
+const ASPECT_RATIO = INITIAL_WIDTH / INITIAL_HEIGHT;
+// ------------------------------------------
 
 const menu=document.getElementById('menu'), game=document.getElementById('game');
 const mName=document.getElementById('m_name'), mColor=document.getElementById('m_color'), mGame=document.getElementById('m_game');
@@ -762,15 +768,63 @@ function placeBarricade(st, nodeId){
 }
 
 // --- Zoom only (wheel + pinch), no pan ---
-let view = { x:0, y:0, w:1090, h:1300 };
+let view = { x:0, y:0, w:INITIAL_WIDTH, h:INITIAL_HEIGHT }; // Utilisation des nouvelles constantes
 function applyView(){ svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`); }
 applyView();
 
-svg.addEventListener('wheel', e=>{ e.preventDefault(); const scale = (e.deltaY>0)? 1.1 : 0.9; const mx = view.x + (e.offsetX/svg.clientWidth)*view.w; const my = view.y + (e.offsetY/svg.clientHeight)*view.h; view.w*=scale; view.h*=scale; view.x = mx - (e.offsetX/svg.clientWidth)*view.w; view.y = my - (e.offsetY/svg.clientHeight)*view.h; applyView(); }, {passive:false});
+svg.addEventListener('wheel', e=>{ 
+  e.preventDefault(); 
+  const scale = (e.deltaY>0)? 1.1 : 0.9; 
+  
+  // 1. Calculer le point central en coordonnées du jeu
+  const mx = view.x + (e.offsetX/svg.clientWidth)*view.w; 
+  const my = view.y + (e.offsetY/svg.clientHeight)*view.h; 
+  
+  // 2. Appliquer le facteur d'échelle et MAINTENIR LE RATIO D'ASPECT
+  view.w*=scale; 
+  view.h = view.w / ASPECT_RATIO; // <-- Le Fix: forcer H à maintenir le ratio
+  
+  // 3. Recalculer le coin supérieur gauche (pan) pour centrer le zoom
+  view.x = mx - (e.offsetX/svg.clientWidth)*view.w; 
+  view.y = my - (e.offsetY/svg.clientHeight)*view.h; 
+  
+  applyView(); 
+}, {passive:false});
 
 const pointers = new Map(); let pinchPrevDist = null;
 svg.addEventListener('pointerdown', e=>{ pointers.set(e.pointerId, e); svg.setPointerCapture(e.pointerId); });
-svg.addEventListener('pointermove', e=>{ if(!pointers.has(e.pointerId)) return; pointers.set(e.pointerId, e); if(pointers.size===2){ const [p1,p2] = [...pointers.values()]; const dx = p2.clientX - p1.clientX; const dy = p2.clientY - p1.clientY; const dist = Math.hypot(dx,dy); const midX = (p1.clientX + p2.clientX)/2; const midY = (p1.clientY + p2.clientY)/2; const mx = view.x + (midX/svg.clientWidth)*view.w; const my = view.y + (midY/svg.clientHeight)*view.h; if(pinchPrevDist!==null && dist>0){ const scale = pinchPrevDist/dist; view.w*=scale; view.h*=scale; view.x = mx - (midX/svg.clientWidth)*view.w; view.y = my - (midY/svg.clientHeight)*view.h; applyView(); } pinchPrevDist = dist; } });
+svg.addEventListener('pointermove', e=>{ 
+  if(!pointers.has(e.pointerId)) return; 
+  pointers.set(e.pointerId, e); 
+  
+  if(pointers.size===2){ 
+    const [p1,p2] = [...pointers.values()]; 
+    const dx = p2.clientX - p1.clientX; 
+    const dy = p2.clientY - p1.clientY; 
+    const dist = Math.hypot(dx,dy); 
+    
+    // Calculer le point central du pincement
+    const midX = (p1.clientX + p2.clientX)/2; 
+    const midY = (p1.clientY + p2.clientY)/2; 
+    const mx = view.x + (midX/svg.clientWidth)*view.w; 
+    const my = view.y + (midY/svg.clientHeight)*view.h; 
+    
+    if(pinchPrevDist!==null && dist>0){ 
+      const scale = pinchPrevDist/dist; 
+      
+      // Appliquer le facteur d'échelle et MAINTENIR LE RATIO D'ASPECT
+      view.w*=scale; 
+      view.h = view.w / ASPECT_RATIO; // <-- Le Fix
+      
+      // Recalculer le coin supérieur gauche (pan)
+      view.x = mx - (midX/svg.clientWidth)*view.w; 
+      view.y = my - (midY/svg.clientHeight)*view.h; 
+      
+      applyView(); 
+    } 
+    pinchPrevDist = dist; 
+  } 
+});
 function endPtr(e){ pointers.delete(e.pointerId); if(pointers.size<2) pinchPrevDist=null; }
 svg.addEventListener('pointerup', endPtr); svg.addEventListener('pointercancel', endPtr); svg.addEventListener('pointerleave', endPtr);
 
