@@ -9,18 +9,13 @@
   <style>
     :root {
       /* THEME DARK / MIDNIGHT */
-      --bg-app: #0f172a;        /* Fond très sombre (bleu nuit) */
+      --bg-app: #0f172a;        /* Fond très sombre */
       --panel-bg: #1e293b;      /* Panneaux gris bleuté */
-      --text-main: #f1f5f9;     /* Texte blanc cassé */
+      --text-main: #f1f5f9;     /* Texte blanc */
       --text-muted: #94a3b8;    /* Texte gris clair */
-      
-      --accent: #3b82f6;        /* Bleu électrique pour les actions */
-      --accent-hover: #2563eb;
-      
+      --accent: #3b82f6;        /* Bleu électrique */
       --board-bg: #334155;      /* Fond du plateau */
-      --line-color: #64748b;    /* Lignes du plateau */
-      
-      --radius: 12px;
+      --line-color: #64748b;    /* Lignes */
     }
 
     * { box-sizing: border-box; }
@@ -30,195 +25,161 @@
       background: var(--bg-app);
       color: var(--text-main);
       font-family: 'Roboto', sans-serif;
-      height: 100vh; /* Force la hauteur de l'écran */
+      height: 100vh;       /* Hauteur écran fixe */
       width: 100vw;
-      overflow: hidden; /* Interdit le scroll global */
+      overflow: hidden;    /* Pas de scroll global */
       display: flex;
       flex-direction: column;
     }
 
-    /* --- LAYOUT INTELLIGENT (FLEXBOX) --- */
-    
-    /* Le conteneur principal du jeu prend toute la place */
-    #game-container {
+    /* --- LAYOUT PRINCIPAL --- */
+    #game {
       display: flex;
-      flex: 1;
+      flex-direction: column;
       height: 100%;
-      overflow: hidden;
+      width: 100%;
     }
 
-    /* Barre latérale (Contrôles) pour PC */
+    #game-container {
+      display: flex;
+      flex: 1;             /* Prend toute la hauteur dispo */
+      height: 100%;
+      overflow: hidden;    /* Coupe ce qui dépasse */
+    }
+
+    /* --- SIDEBAR (PC) / HEADER (MOBILE) --- */
     #sidebar {
-      width: 320px;
+      width: 300px;
       background: var(--panel-bg);
       border-right: 1px solid #334155;
       display: flex;
       flex-direction: column;
       padding: 20px;
       z-index: 10;
-      box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+      flex-shrink: 0; /* Ne jamais rétrécir en dessous de sa taille nécessaire */
     }
 
-    /* Zone du plateau */
+    /* --- ZONE PLATEAU --- */
     #board-area {
-      flex: 1;
+      flex: 1;              /* Prend tout l'espace restant */
       background: var(--bg-app);
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
-      padding: 10px;
+      min-height: 0;        /* CRUCIAL : Permet au flex de réduire la zone si besoin */
+      min-width: 0;
+      overflow: hidden;
     }
 
-    /* SVG RESPONSIVE : S'adapte sans dépasser */
+    #wrap {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     #svg {
-      max-height: 95vh; /* Ne dépasse jamais la hauteur */
       max-width: 100%;
+      max-height: 100%;
       width: auto;
       height: auto;
-      filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+      /* On s'assure que le ratio est respecté sans dépasser */
     }
 
     /* --- STYLES ELEMENTS --- */
-    
-    h3 { margin: 0 0 15px 0; font-size: 1.2rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+    h3 { margin: 0 0 15px 0; font-size: 1.2rem; color: var(--accent); text-transform: uppercase; }
 
     /* Inputs Menu */
     input, select {
-      background: #0f172a;
-      border: 1px solid #475569;
-      color: white;
-      padding: 10px;
-      border-radius: 6px;
-      width: 100%;
-      margin-bottom: 10px;
-      font-size: 1rem;
+      background: #0f172a; border: 1px solid #475569; color: white;
+      padding: 10px; border-radius: 6px; width: 100%; margin-bottom: 10px; font-size: 1rem;
     }
     label { color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px; display: block; }
 
-    /* Boutons modernes */
+    /* Boutons */
     button {
-      background: var(--panel-bg);
-      border: 1px solid var(--accent);
-      color: var(--accent);
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 0.9rem;
-      transition: all 0.2s;
-      width: 100%; /* Pleine largeur dans la sidebar */
-      margin-bottom: 8px;
+      background: var(--panel-bg); border: 1px solid var(--accent); color: var(--accent);
+      padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 0.9rem;
+      width: 100%; margin-bottom: 8px;
     }
-    button.primary {
-      background: var(--accent);
-      color: white;
-      border: none;
-    }
+    button.primary { background: var(--accent); color: white; border: none; }
     button:hover:not(:disabled) { filter: brightness(1.2); }
-    button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+    button:disabled { opacity: 0.5; filter: grayscale(1); }
 
-    /* Logs et Infos */
+    /* Info Jeu */
     #dice-display {
-      background: #0f172a;
-      padding: 15px;
-      border-radius: 8px;
-      text-align: center;
-      margin: 15px 0;
-      border: 1px solid #334155;
+      background: #0f172a; padding: 10px; border-radius: 8px; text-align: center; margin: 10px 0; border: 1px solid #334155;
     }
-    #dice { font-size: 1.5rem; font-weight: bold; color: white; }
-    
+    #dice { font-size: 1.4rem; font-weight: bold; color: white; }
     #turn-info { margin-bottom: 10px; font-size: 0.9rem; color: var(--text-muted); }
-    #turn { color: var(--accent); font-weight: bold; font-size: 1.1rem; }
+    #turn { color: var(--accent); font-weight: bold; }
 
+    /* Log */
     #log {
-      flex: 1; /* Prend la place restante en bas de sidebar */
-      overflow-y: auto;
-      background: #0f172a;
-      border: 1px solid #334155;
-      padding: 10px;
-      border-radius: 6px;
-      font-family: monospace;
-      font-size: 0.8rem;
-      color: #cbd5e1;
-      margin-top: auto; /* Pousse vers le bas */
+      flex: 1; overflow-y: auto; background: #0f172a; border: 1px solid #334155;
+      padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.8rem; color: #cbd5e1; margin-top: auto;
     }
 
-    /* Joueurs */
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      background: #334155;
-      padding: 4px 10px;
-      border-radius: 99px;
-      margin: 2px;
-      font-size: 0.8rem;
-    }
-    .dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
-
-    /* MENU (Overlay centré) */
+    /* Menu Overlay */
     #menu {
-      position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      background: var(--panel-bg);
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-      width: 90%;
-      max-width: 400px;
-      z-index: 100;
-      border: 1px solid #334155;
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: var(--panel-bg); padding: 30px; border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8); width: 90%; max-width: 400px; z-index: 100; border: 1px solid #334155;
     }
     .menu-row { display: flex; gap: 10px; margin-bottom: 10px; }
-    
-    /* SVG Elements Style */
+
+    /* SVG Elements */
     .edge { stroke: var(--line-color); stroke-width: 5; opacity: 0.5; }
-    .node { fill: #1e293b; stroke: #475569; stroke-width: 2; } /* Cercles sombres */
-    .barricade { fill: #000; stroke: #fff; stroke-width: 1; } /* Barricade bien noire contour blanc */
+    .node { fill: #1e293b; stroke: #475569; stroke-width: 2; }
+    .barricade { fill: #000; stroke: #fff; stroke-width: 1; }
     .pawn { stroke: rgba(255,255,255,0.3); stroke-width: 1; }
-    
-    /* Pas d'animation pulsation demandée */
-    .hint-origin { fill: transparent; stroke: #fff; stroke-width: 3; cursor: pointer; opacity: 0.8; } 
+    .hint-origin { fill: transparent; stroke: #fff; stroke-width: 3; cursor: pointer; opacity: 0.8; }
     .hint-target { fill: rgba(59, 130, 246, 0.3); stroke: #3b82f6; stroke-width: 2; cursor: pointer; }
     .select { fill: transparent; stroke: #fbbf24; stroke-width: 3; pointer-events: none; }
+    .tag { display: inline-flex; align-items: center; background: #334155; padding: 2px 8px; border-radius: 99px; margin: 2px; font-size: 0.75rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
 
-    /* --- MOBILE RESPONSIVE (TRES IMPORTANT) --- */
+    /* --- MOBILE RESPONSIVE --- */
     @media (max-width: 768px) {
       #game-container {
-        flex-direction: column; /* Empilement vertical */
+        flex-direction: column; /* Empile verticalement */
       }
       
       #sidebar {
         width: 100%;
-        height: auto; /* Hauteur auto selon contenu */
-        flex-direction: row; /* Éléments côte à côte */
+        height: auto;
+        flex-direction: row; /* En ligne */
         align-items: center;
-        padding: 8px;
+        padding: 8px 12px;
         border-right: none;
         border-bottom: 1px solid #334155;
-        flex-wrap: wrap;
         justify-content: space-between;
-        box-shadow: none;
+        flex-shrink: 0; /* Fixe la hauteur au contenu */
       }
+
+      /* Masquer les éléments non essentiels sur mobile */
+      #sidebar h3, #log { display: none; } 
       
-      /* Réorganisation header mobile */
-      #sidebar h3, #log, #phase { display: none; } /* On cache le titre et le log sur mobile pour gagner place */
+      #turn-info { margin: 0; font-size: 0.8rem; }
       
       #dice-display {
-        margin: 0; padding: 5px 10px; background: transparent; border: none; display: flex; align-items: center; gap: 10px;
+        margin: 0; padding: 0; border: none; background: transparent;
+        width: auto; text-align: left; margin-right: 10px;
       }
-      #dice { font-size: 1.1rem; }
-      
-      #turn-info { margin: 0; font-size: 0.8rem; display: flex; gap: 5px; align-items: center; }
-      
-      /* Bouton Roll compact */
-      #roll { width: auto; margin: 0; padding: 8px 16px; font-size: 0.8rem; }
-      
-      /* Le plateau prend toute la hauteur restante */
-      #board-area { padding: 2px; align-items: flex-start; }
-      #svg { max-height: 85vh; } /* Ajustement sécu mobile */
+      #dice { font-size: 1rem; }
+
+      #players { display: none; } /* On cache la liste des joueurs en haut sur mobile pour gagner de la place */
+
+      #roll { width: auto; margin: 0; padding: 8px 16px; }
+
+      /* Phase instruction overlay sur mobile */
+      #phase {
+        position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
+        background: rgba(0,0,0,0.8); padding: 4px 10px; border-radius: 10px;
+        pointer-events: none; z-index: 50; width: max-content;
+      }
     }
     
     #winOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; display: none; align-items: center; justify-content: center; }
@@ -254,38 +215,39 @@
   </div>
 
   <div id="lobby" style="display:none; margin-top:15px; padding-top:15px; border-top:1px solid #334155;">
-    <label>Joueurs prêts :</label>
-    <div id="lobbyList" style="margin-bottom:10px; min-height:20px;"></div>
+    <label>Salon d'attente :</label>
+    <div id="lobbyList" style="margin-bottom:10px; display:flex; flex-wrap:wrap; gap:5px;"></div>
     <button id="m_start" class="primary">Lancer la partie !</button>
     <small style="color:#64748b; display:block; text-align:center; margin-top:5px;">(Hôte uniquement)</small>
   </div>
 </section>
 
-<div id="game" style="display:none; height:100%; width:100%;">
+<div id="game" style="display:none;">
   <div id="game-container">
     
     <aside id="sidebar">
       <h3>Malefiz</h3>
       
       <div id="turn-info">
-        <span>Tour :</span> <span id="turn">—</span>
+        <span>Tour:</span> <span id="turn">—</span>
       </div>
-
-      <div id="players" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;"></div>
 
       <div id="dice-display">
-        <div id="dice">Dé : —</div>
+        <span id="dice">Dé : —</span>
       </div>
       
-      <button id="roll" class="primary">🎲 LANCER</button>
+      <button id="roll" class="primary">LANCER</button>
       
+      <div id="players" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;"></div>
+
       <div id="phase" style="color:#fbbf24; font-size:0.8rem; font-weight:bold; margin:5px 0; text-align:center; min-height:16px;"></div>
 
       <div id="log">Bienvenue sur Malefiz Dark Edition.<br>En attente...</div>
     </aside>
 
     <main id="board-area">
-      <div id="wrap"> <svg id="svg" viewBox="0 0 1090 1300" xmlns="http://www.w3.org/2000/svg">
+      <div id="wrap">
+        <svg id="svg" viewBox="0 0 1090 1300" xmlns="http://www.w3.org/2000/svg">
           <g id="edges"></g>
           <g id="nodes"></g>
           <g id="homes"></g>
@@ -307,7 +269,7 @@
 
 <script type="module">
 /* ===========================================================
-   LOGIQUE JAVASCRIPT D'ORIGINE (Intacte)
+   LOGIQUE JAVASCRIPT ORIGINALE (INTACTE)
    =========================================================== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
@@ -326,7 +288,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const COLORS={red:"#ef4444",blue:"#3b82f6",green:"#10b981",yellow:"#eab308"}; // Couleurs un peu plus "pop" sur fond sombre
+const COLORS={red:"#ef4444",blue:"#3b82f6",green:"#10b981",yellow:"#eab308"};
 // RESTAURATION EXACTE DE TES DONNÉES
 const NODES = [{"id": "n1", "x": 120, "y": 900, "n": 1}, {"id": "n2", "x": 170, "y": 900, "n": 2}, {"id": "n3", "x": 220, "y": 900, "n": 3}, {"id": "n4", "x": 270, "y": 900, "n": 4}, {"id": "n5", "x": 320, "y": 900, "n": 5}, {"id": "n6", "x": 370, "y": 900, "n": 6}, {"id": "n7", "x": 420, "y": 900, "n": 7}, {"id": "n8", "x": 470, "y": 900, "n": 8}, {"id": "n9", "x": 520, "y": 900, "n": 9}, {"id": "n10", "x": 570, "y": 900, "n": 10}, {"id": "n11", "x": 620, "y": 900, "n": 11}, {"id": "n12", "x": 670, "y": 900, "n": 12}, {"id": "n13", "x": 720, "y": 900, "n": 13}, {"id": "n14", "x": 770, "y": 900, "n": 14}, {"id": "n15", "x": 820, "y": 900, "n": 15}, {"id": "n16", "x": 870, "y": 900, "n": 16}, {"id": "n17", "x": 920, "y": 900, "n": 17}, {"id": "n18", "x": 120, "y": 840, "n": 18}, {"id": "n19", "x": 320, "y": 840, "n": 19}, {"id": "n20", "x": 520, "y": 840, "n": 20}, {"id": "n21", "x": 720, "y": 840, "n": 21}, {"id": "n22", "x": 920, "y": 840, "n": 22}, {"id": "n23", "x": 120, "y": 780, "n": 23}, {"id": "n24", "x": 170, "y": 780, "n": 24}, {"id": "n25", "x": 220, "y": 780, "n": 25}, {"id": "n26", "x": 270, "y": 780, "n": 26}, {"id": "n27", "x": 320, "y": 780, "n": 27}, {"id": "n28", "x": 370, "y": 780, "n": 28}, {"id": "n29", "x": 420, "y": 780, "n": 29}, {"id": "n30", "x": 470, "y": 780, "n": 30}, {"id": "n31", "x": 520, "y": 780, "n": 31}, {"id": "n32", "x": 570, "y": 780, "n": 32}, {"id": "n33", "x": 620, "y": 780, "n": 33}, {"id": "n34", "x": 670, "y": 780, "n": 34}, {"id": "n35", "x": 720, "y": 780, "n": 35}, {"id": "n36", "x": 770, "y": 780, "n": 36}, {"id": "n37", "x": 820, "y": 780, "n": 37}, {"id": "n38", "x": 870, "y": 780, "n": 38}, {"id": "n39", "x": 920, "y": 780, "n": 39}, {"id": "n40", "x": 220, "y": 720, "n": 40}, {"id": "n41", "x": 420, "y": 720, "n": 41}, {"id": "n42", "x": 620, "y": 720, "n": 42}, {"id": "n43", "x": 820, "y": 720, "n": 43}, {"id": "n44", "x": 220, "y": 660, "n": 44}, {"id": "n45", "x": 270, "y": 660, "n": 45}, {"id": "n46", "x": 320, "y": 660, "n": 46}, {"id": "n47", "x": 370, "y": 660, "n": 47}, {"id": "n48", "x": 420, "y": 660, "n": 48}, {"id": "n49", "x": 470, "y": 660, "n": 49}, {"id": "n50", "x": 520, "y": 660, "n": 50}, {"id": "n51", "x": 570, "y": 660, "n": 51}, {"id": "n52", "x": 620, "y": 660, "n": 52}, {"id": "n53", "x": 670, "y": 660, "n": 53}, {"id": "n54", "x": 720, "y": 660, "n": 54}, {"id": "n55", "x": 770, "y": 660, "n": 55}, {"id": "n56", "x": 820, "y": 660, "n": 56}, {"id": "n57", "x": 320, "y": 600, "n": 57}, {"id": "n58", "x": 720, "y": 600, "n": 58}, {"id": "n59", "x": 320, "y": 540, "n": 59}, {"id": "n60", "x": 370, "y": 540, "n": 60}, {"id": "n61", "x": 420, "y": 540, "n": 61}, {"id": "n62", "x": 470, "y": 540, "n": 62}, {"id": "n63", "x": 520, "y": 540, "n": 63}, {"id": "n64", "x": 570, "y": 540, "n": 64}, {"id": "n65", "x": 620, "y": 540, "n": 65}, {"id": "n66", "x": 670, "y": 540, "n": 66}, {"id": "n67", "x": 720, "y": 540, "n": 67}, {"id": "n68", "x": 420, "y": 480, "n": 68}, {"id": "n69", "x": 620, "y": 480, "n": 69}, {"id": "n70", "x": 420, "y": 420, "n": 70}, {"id": "n71", "x": 470, "y": 420, "n": 71}, {"id": "n72", "x": 520, "y": 420, "n": 72}, {"id": "n73", "x": 570, "y": 420, "n": 73}, {"id": "n74", "x": 620, "y": 420, "n": 74}, {"id": "n75", "x": 520, "y": 360, "n": 75}, {"id": "n76", "x": 120, "y": 300, "n": 76}, {"id": "n77", "x": 170, "y": 300, "n": 77}, {"id": "n78", "x": 220, "y": 300, "n": 78}, {"id": "n79", "x": 270, "y": 300, "n": 79}, {"id": "n80", "x": 320, "y": 300, "n": 80}, {"id": "n81", "x": 370, "y": 300, "n": 81}, {"id": "n82", "x": 420, "y": 300, "n": 82}, {"id": "n83", "x": 470, "y": 300, "n": 83}, {"id": "n84", "x": 520, "y": 300, "n": 84}, {"id": "n85", "x": 570, "y": 300, "n": 85}, {"id": "n86", "x": 620, "y": 300, "n": 86}, {"id": "n87", "x": 670, "y": 300, "n": 87}, {"id": "n88", "x": 720, "y": 300, "n": 88}, {"id": "n89", "x": 770, "y": 300, "n": 89}, {"id": "n90", "x": 820, "y": 300, "n": 90}, {"id": "n91", "x": 870, "y": 300, "n": 91}, {"id": "n92", "x": 920, "y": 300, "n": 92}, {"id": "n93", "x": 120, "y": 240, "n": 93}, {"id": "n94", "x": 920, "y": 240, "n": 94}, {"id": "n95", "x": 120, "y": 180, "n": 95}, {"id": "n96", "x": 170, "y": 180, "n": 96}, {"id": "n97", "x": 220, "y": 180, "n": 97}, {"id": "n98", "x": 270, "y": 180, "n": 98}, {"id": "n99", "x": 320, "y": 180, "n": 99}, {"id": "n100", "x": 370, "y": 180, "n": 100}, {"id": "n101", "x": 420, "y": 180, "n": 101}, {"id": "n102", "x": 470, "y": 180, "n": 102}, {"id": "n103", "x": 520, "y": 180, "n": 103}, {"id": "n104", "x": 570, "y": 180, "n": 104}, {"id": "n105", "x": 620, "y": 180, "n": 105}, {"id": "n106", "x": 670, "y": 180, "n": 106}, {"id": "n107", "x": 720, "y": 180, "n": 107}, {"id": "n108", "x": 770, "y": 180, "n": 108}, {"id": "n109", "x": 820, "y": 180, "n": 109}, {"id": "n110", "x": 870, "y": 180, "n": 110}, {"id": "n111", "x": 920, "y": 180, "n": 111}, {"id": "n112", "x": 520, "y": 120, "n": 112}];
 
@@ -395,7 +357,7 @@ function subscribe(id){
 
     for(const o of [...mColor.options]) o.disabled = !!st.colors[o.value];
     lobbyList.innerHTML=""; Object.entries(st.players).forEach(([n,p])=>{ const d=document.createElement('div'); d.className='tag'; d.innerHTML=`<span class="dot" style="background:${COLORS[p.color]}"></span>${n}`; lobbyList.appendChild(d); });
-    if(RST.started){ menu.style.display="none"; game.style.display="block"; }
+    if(RST.started){ menu.style.display="none"; game.style.display="block"; } // Ligne débloquée
     drawState(RST);
     const myTurn = RST.order[RST.turnIndex]===ME;
     const canRoll = RST.started && myTurn && !RST._mustPlaceBarricade && (!RST.dice || RST.dice===0);
