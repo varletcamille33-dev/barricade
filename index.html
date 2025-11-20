@@ -5,16 +5,37 @@
   <title>Malefiz — v9 (barricades instant + correctifs handlers)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root { --beige:#f5e4b2; --text:#2f241a; --panel:#fff6e8; }
+    /* NOUVELLES COULEURS/FOND BOIS */
+    :root { 
+      --wood-bg: #8b4513; 
+      --wood-grain: #7b3c0c;
+      --beige:#f6e8c9; /* Couleur du plateau de jeu */ 
+      --text:#2f241a; 
+      --panel:#fff6e8; 
+    }
     *{box-sizing:border-box}
-    body{margin:0;background:var(--beige);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto}
+    /* FOND BOIS APPLIQUÉ AU BODY */
+    body{
+      margin:0;
+      background: 
+        repeating-linear-gradient(
+          45deg,
+          var(--wood-bg),
+          var(--wood-bg) 20px,
+          var(--wood-grain) 20px,
+          var(--wood-grain) 40px
+        );
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto
+    }
     .card{background:var(--panel);border:1px solid #ead9b9;border-radius:14px;padding:14px;margin:12px}
-    .row{display:flex;gap:8px;flex-wrap:wrap}
+    .row{display:flex;gap:8px;flex-wrap:wrap; align-items:center}
     .col{display:flex;flex-direction:column;gap:8px}
     input,select,button{font:inherit;border-radius:12px;border:1px solid #decab0;background:#fff;padding:10px 12px;color:var(--text)}
     button{background:#cfae7e;border-color:#cfae7e;color:#2b1d12;font-weight:700;cursor:pointer}
     button.primary{background:#b97a2a;border-color:#b97a2a;color:#fff}
-    #wrap{overflow:hidden;border-radius:10px;border:1px solid #e6d8ba;background:#f6e8c9}
+    /* NOUVEL ENCADREMENT BOIS */
+    #wrap{overflow:hidden;border-radius:10px;border:10px solid #5a3c20;background:#f6e8c9}
     #svg{touch-action:none;display:block;width:100%;height:70vh}
     .edge{stroke:#9c744a;stroke-width:4;stroke-linecap:round;opacity:.9}
     .node{fill:#f8efe0;stroke:#a88353;stroke-width:2}
@@ -27,6 +48,73 @@
     .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
     #log{height:160px;overflow:auto;background:#fff;border:1px solid #eadcc7;border-radius:10px;padding:8px;white-space:pre-wrap;font-size:12px}
     .notice{font-size:12px;opacity:.8;margin-left:8px}
+
+    /* CSS DU DÉ 3D ANIMÉ */
+    #dice-container {
+        width: 60px; height: 60px; perspective: 600px;
+        cursor: pointer;
+        user-select: none;
+    }
+    #dice-visual {
+        width: 100%; height: 100%; transform-style: preserve-3d;
+        position: relative;
+        /* Animation fluide pour l'arrêt */
+        transition: transform 1s cubic-bezier(.5,-0.5,.5,1.5);
+    }
+    .face {
+        position: absolute; width: 60px; height: 60px;
+        background: #fff; border: 1px solid #000;
+        box-shadow: inset 0 0 10px rgba(0,0,0,.3);
+        display: grid; padding: 5px;
+    }
+    .d-dot {
+        display: block; width: 10px; height: 10px; background: #000; border-radius: 50%;
+        margin: auto; /* Centrage pour le point */
+    }
+
+    /* Face transformations */
+    .front { transform: translateZ(30px); }
+    .back { transform: rotateX(180deg) translateZ(30px); }
+    .right { transform: rotateY(90deg) translateZ(30px); }
+    .left { transform: rotateY(-90deg) translateZ(30px); }
+    .top { transform: rotateX(90deg) translateZ(30px); }
+    .bottom { transform: rotateX(-90deg) translateZ(30px); }
+    
+    /* Pips positioning (using CSS Grid) */
+    .face { grid-template-rows: repeat(3, 1fr); grid-template-columns: repeat(3, 1fr); }
+    .dot-center { grid-area: 2 / 2; }
+    .dot-tl { grid-area: 1 / 1; }
+    .dot-tr { grid-area: 1 / 3; }
+    .dot-bl { grid-area: 3 / 1; }
+    .dot-br { grid-area: 3 / 3; }
+    .dot-cl { grid-area: 2 / 1; } /* Center Left */
+    .dot-cr { grid-area: 2 / 3; } /* Center Right */
+    
+    /* Dice face contents */
+    .face.f1 .dot-center {}
+    .face.f2 .dot-tl, .face.f2 .dot-br {}
+    .face.f3 .dot-tl, .face.f3 .dot-center, .face.f3 .dot-br {}
+    .face.f4 .dot-tl, .face.f4 .dot-tr, .face.f4 .dot-bl, .face.f4 .dot-br {}
+    .face.f5 .dot-tl, .face.f5 .dot-tr, .face.f5 .dot-center, .face.f5 .dot-bl, .face.f5 .dot-br {}
+    .face.f6 .dot-tl, .face.f6 .dot-tr, .face.f6 .dot-cl, .face.f6 .dot-cr, .face.f6 .dot-bl, .face.f6 .dot-br {}
+
+    /* Roll animation states (fixed, to set the result) */
+    .dice-face-0 { transform: translateZ(-30px) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+    .dice-face-1 { transform: translateZ(-30px) rotateX(0deg) rotateY(0deg); }
+    .dice-face-2 { transform: translateZ(-30px) rotateY(-90deg); }
+    .dice-face-3 { transform: translateZ(-30px) rotateX(90deg); }
+    .dice-face-4 { transform: translateZ(-30px) rotateX(-90deg); }
+    .dice-face-5 { transform: translateZ(-30px) rotateY(90deg); }
+    .dice-face-6 { transform: translateZ(-30px) rotateY(180deg); }
+
+    /* Animation de "lancement" */
+    .dice-rolling {
+        animation: roll-spin 0.5s linear infinite;
+    }
+    @keyframes roll-spin {
+        0% { transform: translateZ(-30px) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+        100% { transform: translateZ(-30px) rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -61,8 +149,35 @@
 <section id="game" class="card" style="display:none">
   <div class="row" style="align-items:center;justify-content:space-between">
     <div class="row" style="gap:12px;align-items:center">
-      <button id="roll">🎲 Lancer le dé</button>
-      <div id="dice">Dé : —</div>
+      <div id="dice-container">
+          <div id="dice-visual" class="dice-face-0">
+              <div class="face front f1">
+                  <span class="d-dot dot-center"></span>
+              </div>
+              <div class="face back f6">
+                  <span class="d-dot dot-tl"></span><span class="d-dot dot-tr"></span>
+                  <span class="d-dot dot-cl"></span><span class="d-dot dot-cr"></span>
+                  <span class="d-dot dot-bl"></span><span class="d-dot dot-br"></span>
+              </div>
+              <div class="face right f5">
+                  <span class="d-dot dot-tl"></span><span class="d-dot dot-tr"></span>
+                  <span class="d-dot dot-center"></span>
+                  <span class="d-dot dot-bl"></span><span class="d-dot dot-br"></span>
+              </div>
+              <div class="face left f2">
+                  <span class="d-dot dot-tl"></span><span class="d-dot dot-br"></span>
+              </div>
+              <div class="face top f3">
+                  <span class="d-dot dot-tl"></span><span class="d-dot dot-center"></span>
+                  <span class="d-dot dot-br"></span>
+              </div>
+              <div class="face bottom f4">
+                  <span class="d-dot dot-tl"></span><span class="d-dot dot-tr"></span>
+                  <span class="d-dot dot-bl"></span><span class="d-dot dot-br"></span>
+              </div>
+          </div>
+      </div>
+      <div id="dice-display">Dé : —</div>
       <div>Tour : <strong id="turn">—</strong></div>
       <div id="phase" class="notice"></div>
     </div>
@@ -131,8 +246,13 @@ const mName=document.getElementById('m_name'), mColor=document.getElementById('m
 const mCreate=document.getElementById('m_create'), mJoin=document.getElementById('m_join'), mStart=document.getElementById('m_start');
 const lobby=document.getElementById('lobby'), lobbyList=document.getElementById('lobbyList');
 const svg=document.getElementById('svg'); const G_E=document.getElementById('edges'); const G_N=document.getElementById('nodes'); const G_H=document.getElementById('homes'); const G_P=document.getElementById('pieces'); const G_UI=document.getElementById('ui');
-const playersEl=document.getElementById('players'); const diceEl=document.getElementById('dice'); const turnEl=document.getElementById('turn'); const phaseEl=document.getElementById('phase'); const logEl=document.getElementById('log');
-const rollBtn = document.getElementById('roll');
+const playersEl=document.getElementById('players'); 
+// MODIFIE ICI
+const diceContainer = document.getElementById('dice-container');
+const diceVisual = document.getElementById('dice-visual');
+const diceDisplay = document.getElementById('dice-display');
+const turnEl=document.getElementById('turn'); const phaseEl=document.getElementById('phase'); const logEl=document.getElementById('log');
+// const rollBtn = document.getElementById('roll'); // Supprimé
 
 let ME="", MYCOLOR="red", gameRef=null, IS_HOST=false;
 let LOCAL_BARR_ADDS = new Set(); // affichage optimiste des barricades posées
@@ -180,9 +300,15 @@ function subscribe(id){
     lobbyList.innerHTML=""; Object.entries(st.players).forEach(([n,p])=>{ const d=document.createElement('div'); d.className='tag'; d.innerHTML=`<span class="dot" style="background:${COLORS[p.color]}"></span>${n}`; lobbyList.appendChild(d); });
     if(RST.started){ menu.style.display="none"; game.style.display="block"; }
     drawState(RST);
+    
     const myTurn = RST.order[RST.turnIndex]===ME;
     const canRoll = RST.started && myTurn && !RST._mustPlaceBarricade && (!RST.dice || RST.dice===0);
-    rollBtn.disabled = !canRoll; rollBtn.style.opacity = canRoll ? "1" : ".5";
+    // REMPLACE LE BOUTON.DISABLED
+    if (diceContainer) {
+        diceContainer.style.opacity = canRoll ? "1" : ".5";
+        diceContainer.style.pointerEvents = canRoll ? "auto" : "none";
+    }
+    
     if(RST._mustPlaceBarricade && st._placer===ME){ phaseEl.textContent = "Place une barricade noire sur une case libre"; showBarricadeTargets(RST); }
     else { phaseEl.textContent = ""; enableTurn(RST); }
 
@@ -204,7 +330,28 @@ function drawPawns(st){ for(const [name,pl] of Object.entries(st.players)){ for(
 
 function drawState(st){ 
   playersEl.innerHTML=""; Object.entries(st.players).forEach(([n,p])=>{ const d=document.createElement('div'); d.className='tag'; d.innerHTML=`<span class="dot" style="background:${COLORS[p.color]}"></span>${n}`; playersEl.appendChild(d); });
-  diceEl.textContent="Dé : "+(st.dice||"—"); 
+  
+  // MISE À JOUR DU DÉ VISUEL ET TEXTUEL
+  const diceValue = st.dice || 0;
+  diceDisplay.textContent="Dé : "+(diceValue||"—");
+
+  if (diceVisual) {
+      // 1. Gérer l'arrêt de l'animation pour afficher le résultat final
+      if (diceVisual.classList.contains('dice-rolling')) {
+          diceVisual.classList.remove('dice-rolling');
+          // Délai court pour laisser l'animation CSS se terminer avant de 'snapper' au résultat
+          setTimeout(() => {
+              diceVisual.className = '';
+              diceVisual.classList.add(`dice-face-${diceValue}`);
+          }, 500); // 500ms est plus court que la transition de 1s, mais suffisant
+      } else {
+          // 2. Afficher immédiatement le résultat si pas en cours de lancement
+          diceVisual.className = '';
+          diceVisual.classList.add(`dice-face-${diceValue}`);
+      }
+  }
+  // FIN MISE À JOUR DU DÉ
+
   const myTurn = st.order[st.turnIndex]===ME; turnEl.textContent=(st.order[st.turnIndex]||"—")+(myTurn?" (à toi)":""); 
   G_E.innerHTML=""; G_N.innerHTML=""; G_H.innerHTML=""; G_P.innerHTML=""; G_UI.innerHTML="";
   const mergedBarr = Array.from(new Set([...(st.barricades||[]), ...LOCAL_BARR_ADDS]));
@@ -289,11 +436,33 @@ function autoSkipIfStuck(st) {
 
 
 // Roll: only once per turn, not during barricade placement
-rollBtn.onclick = async ()=>{ await runTransaction(gameRef,(st)=>{ st=ensure(st); if(!st.started) return st; if(st.order[st.turnIndex]!==ME) return st; if(st._mustPlaceBarricade) return st; if(st.dice && st.dice>0) return st; st.dice=Math.floor(Math.random()*6)+1; return st; }); };
+// MISE À JOUR DU LANCEMENT DE DÉ
+diceContainer.onclick = async ()=>{
+  // La vérification canRoll est faite dans subscribe pour désactiver le clic/opacité
+
+  // 1. Démarrer l'animation
+  if (diceVisual) {
+      diceVisual.className = 'dice-rolling';
+  }
+
+  // 2. Mettre à jour Firebase
+  await runTransaction(gameRef,(st)=>{ 
+    st=ensure(st); 
+    if(!st.started) return st; 
+    if(st.order[st.turnIndex]!==ME) return st; 
+    if(st._mustPlaceBarricade) return st; 
+    if(st.dice && st.dice>0) return st; 
+    
+    // Le dé est lancé ici
+    st.dice=Math.floor(Math.random()*6)+1; 
+    return st; 
+  });
+  // L'abonnement Firebase recevra la nouvelle valeur de st.dice et arrêtera l'animation dans drawState.
+};
 
 let currentSelect = null;
 
-// --- MODIFICATIONS APPLIQUÉES ICI ---
+// --- DÉJÀ MODIFIÉ : Correction de sélection pour le bureau ---
 function addOriginHalo(x,y,onclick){ 
   const o=document.createElementNS("http://www.w3.org/2000/svg","circle"); 
   o.setAttribute("cx",x); 
@@ -322,7 +491,7 @@ function addTargetHalo(x,y,onclick){
   c.ontouchstart = (e) => { e.preventDefault(); e.stopPropagation(); onclick(); };
   G_UI.appendChild(c); 
 }
-// --- FIN DES MODIFICATIONS ---
+// --- FIN CORRECTION DE SÉLECTION ---
 
 function addTargetHaloWithLabel(x,y,label,onclick){
   addTargetHalo(x,y,onclick);
@@ -582,8 +751,9 @@ function __showVictoryOverlay(__winnerName){
   __winTitle.textContent = `Victoire de ${__winnerName}`;
   __winMsg.textContent = "Si Camille a gagné, c'est logique, elle est trop forte. Si elle a perdu, sachez qu'elle est en train de vous insulter";
   __winOverlay.style.display = 'flex';
-  const __roll = document.getElementById('rollBtn');
-  if (__roll) __roll.disabled = true;
+  // Désactiver l'interaction du dé en cas de victoire
+  const diceContainer = document.getElementById('dice-container');
+  if (diceContainer) diceContainer.style.pointerEvents = 'none';
 }
 
 // 3) Attach watcher once when gameRef exists
