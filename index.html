@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Malefiz — Battle Edition (Desktop Fix V6)</title>
+  <title>Malefiz — Battle Edition (Clean Desktop Fix)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
-    /* --- VARIABLES & THEME (Conservé de la V6) --- */
+    /* --- VARIABLES & THEME (Identique à votre index(6).html) --- */
     :root {
       --bg-main: #666e9b; 
       --bg-gradient: linear-gradient(135deg, #4c5482 0%, #fecfef 100%);
@@ -245,37 +245,44 @@
     #winBox { box-shadow: 0 20px 60px rgba(0,0,0,0.15); border: none; background:#fff; border-radius:24px; padding:20px; }
     #winTitle { color: var(--primary); font-size: 2rem; }
 
-    /* ========================================= */
-    /* 🖥️ AJOUT ORDINATEUR (GRID LAYOUT) 🖥️ */
-    /* ========================================= */
+    /* ========================================================== */
+    /* 🖥️ MISE EN PAGE ORDINATEUR (Uniquement si écran large) 🖥️ */
+    /* ========================================================== */
     @media (min-width: 1024px) {
       body {
         justify-content: center;
-        overflow: hidden; /* Pas de scroll sur PC */
+        overflow: hidden;
       }
 
+      /* Passage en mode Grille pour organiser l'écran */
       #game {
-        display: grid !important; /* Active la grille */
+        display: grid !important;
         height: 100vh;
         width: 100%;
         padding: 20px;
         gap: 20px;
-        /* Plateau à gauche (max) | UI à droite (380px) */
+        
+        /* 2 Colonnes : Plateau à gauche (flexible) | Menu à droite (fixe) */
         grid-template-columns: 1fr 380px;
+        
+        /* 2 Lignes : HUD en haut | Logs en bas */
         grid-template-rows: auto 1fr;
+        
         grid-template-areas: 
           "board hud"
           "board logs";
       }
 
+      /* Zone du plateau */
       #wrap {
         grid-area: board;
         width: 100%;
         height: 100%;
-        border-width: 10px;
         margin: 0;
+        border-width: 8px;
       }
 
+      /* Zone du haut (Dés, Tours) qui passe à droite */
       .hud-bar {
         grid-area: hud;
         flex-direction: column;
@@ -291,8 +298,9 @@
         margin-bottom: 10px;
       }
 
-      #roll { width: 100%; font-size: 1.2em; padding: 15px; }
+      #roll { width: 100%; padding: 15px; font-size: 1.1em; }
 
+      /* Zone du bas (Joueurs, Chat) qui passe à droite en dessous */
       #bottom-panel {
         grid-area: logs;
         flex-direction: column;
@@ -302,9 +310,9 @@
       }
 
       .player-list {
-        min-height: auto;
-        max-height: 200px;
         width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
       }
 
       #log {
@@ -313,7 +321,8 @@
         border: 4px solid rgba(255,255,255,0.5);
       }
       
-      .card { margin: auto; max-width: 700px; }
+      /* Le menu d'accueil centré et plus joli */
+      .card { margin: auto; max-width: 600px; }
     }
   </style>
 </head>
@@ -369,8 +378,8 @@
         <span style="font-size:0.8em; text-transform:uppercase; opacity:0.6">Dé</span>
         <span id="diceVal" class="dice-val">—</span>
       </div>
+      <div class="turn-indicator">C'est à <strong id="turn">—</strong></div>
     </div>
-    <div class="turn-indicator">C'est à <strong id="turn">—</strong></div>
     <div id="phase" class="notice"></div>
   </div>
 
@@ -401,7 +410,7 @@
 </div>
 
 <script type="module">
-/* --- RESTAURATION DE VOTRE VERSION ORIGINALE V6 (Firebase 12.4.0) --- */
+/* --- VERSION FIREBASE RESTAURÉE STRICTEMENT A LA V12.4.0 (SELON VOTRE FICHIER ORIGINAL) --- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
@@ -420,7 +429,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 const COLORS={red:"#FF5E5B",blue:"#4ECDC4",green:"#87D37C",yellow:"#FFD93D"};
-const NODES = [{"id": "n1", "x": 120, "y": 900, "n": 1}, {"id": "n2", "x": 170, "y": 900, "n": 2}, {"id": "n3", "x": 220, "y": 900, "n": 3}, {"id": "n4", "x": 270, "y": 900, "n": 4}, {"id": "n5", "x": 320, "y": 900, "n": 5}, {"id": "n6", "x": 370, "y": 900, "n": 6}, {"id": "n7", "x": 420, "y": 900, "n": 7}, {"id": "n8", "x": 470, "y": 900, "n": 8}, {"id": "n9", "x": 520, "y": 900, "n": 9}, {"id": "n10", "x": 570, "y": 900, "n": 10}, {"id": "n11", "x": 620, "y": 900, "n": 11}, {"id": "n12", "x": 670, "y": 900, "n": 12}, {"id": "n13", "x": 720, "y": 900, "n": 13}, {"id": "n14", "x": 770, "y": 900, "n": 14}, {"id": "n15", "x": 820, "y": 900, "n": 15}, {"id": "n16", "x": 870, "y": 900, "n": 16}, {"id": "n17", "x": 920, "y": 900, "n": 17}, {"id": "n18", "x": 120, "y": 840, "n": 18}, {"id": "n19", "x": 320, "y": 840, "n": 19}, {"id": "n20", "x": 520, "y": 840, "n": 20}, {"id": "n21", "x": 720, "y": 840, "n": 21}, {"id": "n22", "x": 920, "y": 840, "n": 22}, {"id": "n23", "x": 120, "y": 780, "n": 23}, {"id": "n24", "x": 170, "y": 780, "n": 24}, {"id": "n25", "x": 220, "y": 780, "n": 25}, {"id": "n26", "x": 270, "y": 780, "n": 26}, {"id": "n27", "x": 320, "y": 780, "n": 27}, {"id": "n28", "x": 370, "y": 780, "n": 28}, {"id": "n29", "x": 420, "y": 780, "n": 29}, {"id": "n30", "x": 470, "y": 780, "n": 30}, {"id": "n31", "x": 520, "y": 780, "n": 31}, {"id": "n32", "x": 570, "y": 780, "n": 32}, {"id": "n33", "x": 620, "y": 780, "n": 33}, {"id": "n34", "x": 670, "y": 780, "n": 34}, {"id": "n35", "x": 720, "y": 780, "n": 35}, {"id": "n36", "x": 770, "y": 780, "n": 36}, {"id": "n37", "x": 820, "y": 780, "n": 37}, {"id": "n38", "x": 870, "y": 780, "n": 38}, {"id": "n39", "x": 920, "y": 780, "n": 39}, {"id": "n40", "x": 220, "y": 720, "n": 40}, {"id": "n41", "x": 420, "y": 720, "n": 41}, {"id": "n42", "x": 620, "y": 720, "n": 42}, {"id": "n43", "x": 820, "y": 720, "n": 43}, {"id": "n44", "x": 220, "y": 660, "n": 44}, {"id": "n45", "x": 270, "y": 660, "n": 45}, {"id": "n46", "x": 320, "y": 660, "n": 46}, {"id": "n47", "x": 370, "y": 660, "n": 47}, {"id": "n48", "x": 420, "y": 660, "n": 48}, {"id": "n49", "x": 470, "y": 660, "n": 49}, {"id": "n50", "x": 520, "y": 660, "n": 50}, {"id": "n51", "x": 570, "y": 660, "n": 51}, {"id": "n52", "x": 620, "y": 660, "n": 52}, {"id": "n53", "x": 670, "y": 660, "n": 53}, {"id": "n54", "x": 720, "y": 660, "n": 54}, {"id": "n55", "x": 770, "y": 660, "n": 55}, {"id": "n56", "x": 820, "y": 660, "n": 56}, {"id": "n57", "x": 320, "y": 600, "n": 57}, {"id": "n58", "x": 720, "y": 600, "n": 58}, {"id": "n59", "x": 320, "y": 540, "n": 59}, {"id": "n60", "x": 370, "y": 540, "n": 60}, {"id": "n61", "x": 420, "y": 540, "n": 61}, {"id": "n62", "x": 470, "y": 540, "n": 62}, {"id": "n63", "x": 520, "y": 540, "n": 63}, {"id": "n64", "x": 570, "y": 540, "n": 64}, {"id": "n65", "x": 620, "y": 540, "n": 65}, {"id": "n66", "x": 670, "y": 540, "n": 66}, {"id": "n67", "x": 720, "y": 540, "n": 67}, {"id": "n68", "x": 420, "y": 480, "n": 68}, {"id": "n69", "x": 620, "y": 480, "n": 69}, {"id": "n70", "x": 420, "y": 420, "n": 70}, {"id": "n71", "x": 470, "y": 420, "n": 71}, {"id": "n72", "x": 520, "y": 420, "n": 72}, {"id": "n73", "x": 570, "y": 420, "n": 73}, {"id": "n74", "x": 620, "y": 420, "n": 74}, {"id": "n75", "x": 520, "y": 360, "n": 75}, {"id": "n76", "x": 120, "y": 300, "n": 76}, {"id": "n77", "x": 170, "y": 300, "n77}, {"id": "n78", "x": 220, "y": 300, "n78}, {"id": "n79", "x": 270, "y": 300, "n": 79}, {"id": "n80", "x": 320, "y": 300, "n": 80}, {"id": "n81", "x": 370, "y": 300, "n": 81}, {"id": "n82", "x": 420, "y": 300, "n": 82}, {"id": "n83", "x": 470, "y": 300, "n": 83}, {"id": "n84", "x": 520, "y": 300, "n": 84}, {"id": "n85", "x": 570, "y": 300, "n": 85}, {"id": "n86", "x": 620, "y": 300, "n": 86}, {"id": "n87", "x": 670, "y": 300, "n": 87}, {"id": "n88", "x": 720, "y": 300, "n": 88}, {"id": "n89", "x": 770, "y": 300, "n": 89}, {"id": "n90", "x": 820, "y": 300, "n": 90}, {"id": "n91", "x": 870, "y": 300, "n": 91}, {"id": "n92", "x": 920, "y": 300, "n": 92}, {"id": "n93", "x": 120, "y": 240, "n": 93}, {"id": "n94", "x": 920, "y": 240, "n": 94}, {"id": "n95", "x": 120, "y": 180, "n": 95}, {"id": "n96", "x": 170, "y": 180, "n": 96}, {"id": "n97", "x": 220, "y": 180, "n": 97}, {"id": "n98", "x": 270, "y": 180, "n": 98}, {"id": "n99", "x": 320, "y": 180, "n": 99}, {"id": "n100", "x": 370, "y": 180, "n": 100}, {"id": "n101", "x": 420, 180, "n": 101}, {"id": "n102", "x": 470, 180, "n": 102}, {"id": "n103", "x": 520, "y": 180, "n103}, {"id": "n104", "x": 570, "y": 180, "n": 104}, {"id": "n105", "x": 620, "y": 180, "n": 105}, {"id": "n106", "x": 670, "y": 180, "n": 106}, {"id": "n107", "x": 720, 180, "n": 107}, {"id": "n108", "x": 770, "y": 180, "n": 108}, {"id": "n109", "x": 820, "y": 180, "n": 109}, {"id": "n110", "x": 870, "y": 180, "n": 110}, {"id": "n111", "x": 920, 180, "n111}, {"id": "n112", "x": 520, "y": 120, "n112}];
+const NODES = [{"id": "n1", "x": 120, "y": 900, "n": 1}, {"id": "n2", "x": 170, "y": 900, "n": 2}, {"id": "n3", "x": 220, "y": 900, "n": 3}, {"id": "n4", "x": 270, "y": 900, "n": 4}, {"id": "n5", "x": 320, "y": 900, "n": 5}, {"id": "n6", "x": 370, "y": 900, "n": 6}, {"id": "n7", "x": 420, "y": 900, "n": 7}, {"id": "n8", "x": 470, "y": 900, "n": 8}, {"id": "n9", "x": 520, "y": 900, "n": 9}, {"id": "n10", "x": 570, "y": 900, "n": 10}, {"id": "n11", "x": 620, "y": 900, "n": 11}, {"id": "n12", "x": 670, "y": 900, "n": 12}, {"id": "n13", "x": 720, "y": 900, "n": 13}, {"id": "n14", "x": 770, "y": 900, "n": 14}, {"id": "n15", "x": 820, "y": 900, "n": 15}, {"id": "n16", "x": 870, "y": 900, "n": 16}, {"id": "n17", "x": 920, "y": 900, "n": 17}, {"id": "n18", "x": 120, "y": 840, "n": 18}, {"id": "n19", "x": 320, "y": 840, "n": 19}, {"id": "n20", "x": 520, "y": 840, "n": 20}, {"id": "n21", "x": 720, "y": 840, "n": 21}, {"id": "n22", "x": 920, "y": 840, "n": 22}, {"id": "n23", "x": 120, "y": 780, "n": 23}, {"id": "n24", "x": 170, "y": 780, "n": 24}, {"id": "n25", "x": 220, "y": 780, "n": 25}, {"id": "n26", "x": 270, "y": 780, "n": 26}, {"id": "n27", "x": 320, "y": 780, "n": 27}, {"id": "n28", "x": 370, "y": 780, "n": 28}, {"id": "n29", "x": 420, "y": 780, "n": 29}, {"id": "n30", "x": 470, "y": 780, "n": 30}, {"id": "n31", "x": 520, "y": 780, "n": 31}, {"id": "n32", "x": 570, "y": 780, "n": 32}, {"id": "n33", "x": 620, "y": 780, "n": 33}, {"id": "n34", "x": 670, "y": 780, "n": 34}, {"id": "n35", "x": 720, "y": 780, "n": 35}, {"id": "n36", "x": 770, "y": 780, "n": 36}, {"id": "n37", "x": 820, "y": 780, "n": 37}, {"id": "n38", "x": 870, "y": 780, "n": 38}, {"id": "n39", "x": 920, "y": 780, "n": 39}, {"id": "n40", "x": 220, "y": 720, "n": 40}, {"id": "n41", "x": 420, "y": 720, "n": 41}, {"id": "n42", "x": 620, "y": 720, "n": 42}, {"id": "n43", "x": 820, "y": 720, "n": 43}, {"id": "n44", "x": 220, "y": 660, "n": 44}, {"id": "n45", "x": 270, "y": 660, "n": 45}, {"id": "n46", "x": 320, "y": 660, "n": 46}, {"id": "n47", "x": 370, "y": 660, "n": 47}, {"id": "n48", "x": 420, "y": 660, "n": 48}, {"id": "n49", "x": 470, "y": 660, "n": 49}, {"id": "n50", "x": 520, "y": 660, "n": 50}, {"id": "n51", "x": 570, "y": 660, "n": 51}, {"id": "n52", "x": 620, "y": 660, "n": 52}, {"id": "n53", "x": 670, "y": 660, "n": 53}, {"id": "n54", "x": 720, "y": 660, "n": 54}, {"id": "n55", "x": 770, "y": 660, "n": 55}, {"id": "n56", "x": 820, "y": 660, "n": 56}, {"id": "n57", "x": 320, "y": 600, "n": 57}, {"id": "n58", "x": 720, "y": 600, "n": 58}, {"id": "n59", "x": 320, "y": 540, "n": 59}, {"id": "n60", "x": 370, "y": 540, "n": 60}, {"id": "n61", "x": 420, "y": 540, "n": 61}, {"id": "n62", "x": 470, "y": 540, "n": 62}, {"id": "n63", "x": 520, "y": 540, "n": 63}, {"id": "n64", "x": 570, "y": 540, "n": 64}, {"id": "n65", "x": 620, "y": 540, "n": 65}, {"id": "n66", "x": 670, "y": 540, "n": 66}, {"id": "n67", "x": 720, "y": 540, "n": 67}, {"id": "n68", "x": 420, "y": 480, "n": 68}, {"id": "n69", "x": 620, "y": 480, "n": 69}, {"id": "n70", "x": 420, "y": 420, "n": 70}, {"id": "n71", "x": 470, "y": 420, "n": 71}, {"id": "n72", "x": 520, "y": 420, "n": 72}, {"id": "n73", "x": 570, "y": 420, "n": 73}, {"id": "n74", "x": 620, "y": 420, "n": 74}, {"id": "n75", "x": 520, "y": 360, "label": 75}, {"id": "n76", "x": 120, "y": 300, "n": 76}, {"id": "n77", "x": 170, "y": 300, "n": 77}, {"id": "n78", "x": 220, "y": 300, "n": 78}, {"id": "n79", "x": 270, "y": 300, "n": 79}, {"id": "n80", "x": 320, "y": 300, "n": 80}, {"id": "n81", "x": 370, "y": 300, "n": 81}, {"id": "n82", "x": 420, "y": 300, "n": 82}, {"id": "n83", "x": 470, "y": 300, "n": 83}, {"id": "n84", "x": 520, "y": 300, "n": 84}, {"id": "n85", "x": 570, "y": 300, "n": 85}, {"id": "n86", "x": 620, "y": 300, "n": 86}, {"id": "n87", "x": 670, "y": 300, "n": 87}, {"id": "n88", "x": 720, "y": 300, "n": 88}, {"id": "n89", "x": 770, "y": 300, "n": 89}, {"id": "n90", "x": 820, "y": 300, "n": 90}, {"id": "n91", "x": 870, "y": 300, "n": 91}, {"id": "n92", "x": 920, "y": 300, "n": 92}, {"id": "n93", "x": 120, "y": 240, "n": 93}, {"id": "n94", "x": 920, "y": 240, "n": 94}, {"id": "n95", "x": 120, "y": 180, "n": 95}, {"id": "n96", "x": 170, "y": 180, "n": 96}, {"id": "n97", "x": 220, "y": 180, "n": 97}, {"id": "n98", "x": 270, "y": 180, "n": 98}, {"id": "n99", "x": 320, "y": 180, "n": 99}, {"id": "n100", "x": 370, "y": 180, "n": 100}, {"id": "n101", "x": 420, "y": 180, "n": 101}, {"id": "n102", "x": 470, "y": 180, "n": 102}, {"id": "n103", "x": 520, "y": 180, "n": 103}, {"id": "n104", "x": 570, "y": 180, "n": 104}, {"id": "n105", "x": 620, "y": 180, "n": 105}, {"id": "n106", "x": 670, "y": 180, "n": 106}, {"id": "n107", "x": 720, "y": 180, "n": 107}, {"id": "n108", "x": 770, "y": 180, "n": 108}, {"id": "n109", "x": 820, "y": 180, "n": 109}, {"id": "n110", "x": 870, "y": 180, "n": 110}, {"id": "n111", "x": 920, "y": 180, "n": 111}, {"id": "n112", "x": 520, "y": 120, "n112}];
 const ADJ = {"n112": ["n103"], "n95": ["n96", "n93"], "n96": ["n97", "n95"], "n97": ["n98", "n96"], "n98": ["n99", "n97"], "n99": ["n100", "n98"], "n100": ["n101", "n99"], "n101": ["n102", "n100"], "n102": ["n103", "n101"], "n103": ["n104", "n102", "n112"], "n104": ["n105", "n103"], "n105": ["n106", "n104"], "n106": ["n107", "n105"], "n107": ["n108", "n106"], "n108": ["n109", "n107"], "n109": ["n110", "n108"], "n110": ["n111", "n109"], "n111": ["n110", "n94"], "n93": ["n76", "n95"], "n94": ["n92", "n111"], "n76": ["n77", "n93"], "n77": ["n78", "n76"], "n78": ["n79", "n77"], "n79": ["n80", "n78"], "n80": ["n81", "n79"], "n81": ["n82", "n80"], "n82": ["n83", "n81"], "n83": ["n84", "n82"], "n84": ["n85", "n83", "n75"], "n85": ["n86", "n84"], "n86": ["n87", "n85"], "n87": ["n88", "n86"], "n88": ["n89", "n87"], "n89": ["n90", "n88"], "n90": ["n91", "n89"], "n91": ["n92", "n90"], "n92": ["n91", "n94"], "n75": ["n72", "n84"], "n70": ["n71", "n68"], "n71": ["n72", "n70"], "n72": ["n73", "n71", "n75"], "n73": ["n74", "n72"], "n74": ["n73", "n69"], "n68": ["n61", "n70"], "n69": ["n65", "n74"], "n59": ["n60", "n57"], "n60": ["n61", "n59"], "n61": ["n62", "n60", "n68"], "n62": ["n63", "n61"], "n63": ["n64", "n62"], "n64": ["n65", "n63"], "n65": ["n66", "n64", "n69"], "n66": ["n67", "n65"], "n67": ["n66", "n58"], "n57": ["n46", "n59"], "n58": ["n54", "n67"], "n44": ["n45", "n40"], "n45": ["n46", "n44"], "n46": ["n47", "n45", "n57"], "n47": ["n48", "n46"], "n48": ["n49", "n47", "n41"], "n49": ["n50", "n48"], "n50": ["n51", "n49"], "n51": ["n52", "n50"], "n52": ["n53", "n51", "n42"], "n53": ["n54", "n52"], "n54": ["n55", "n53", "n58"], "n55": ["n56", "n54"], "n56": ["n55", "n43"], "n40": ["n25", "n44"], "n41": ["n29", "n48"], "n42": ["n33", "n52"], "n43": ["n37", "n56"], "n23": ["n24", "n18"], "n24": ["n25", "n23"], "n25": ["n26", "n24", "n40"], "n26": ["n27", "n25"], "n27": ["n28", "n26", "n19"], "n28": ["n29", "n27"], "n29": ["n30", "n28", "n41"], "n30": ["n31", "n29"], "n31": ["n32", "n30", "n20"], "n32": ["n33", "n31"], "n33": ["n34", "n32", "n42"], "n34": ["n35", "n33"], "n35": ["n36", "n34", "n21"], "n36": ["n37", "n35"], "n37": ["n38", "n36", "n43"], "n38": ["n39", "n37"], "n39": ["n38", "n22"], "n18": ["n1", "n23"], "n19": ["n5", "n27"], "n20": ["n9", "n31"], "n21": ["n13", "n35"], "n22": ["n17", "n39"], "n1": ["n2", "n18"], "n2": ["n3", "n1"], "n3": ["n4", "n2"], "n4": ["n5", "n3"], "n5": ["n6", "n4", "n19"], "n6": ["n7", "n5"], "n7": ["n8", "n6"], "n8": ["n9", "n7"], "n9": ["n10", "n8", "n20"], "n10": ["n11", "n9"], "n11": ["n12", "n10"], "n12": ["n13", "n11"], "n13": ["n14", "n12", "n21"], "n14": ["n15", "n13"], "n15": ["n16", "n14"], "n16": ["n17", "n15"], "n17": ["n16", "n22"]};
 const HOMES = {"red": [{"x": 120, "y": 1050}, {"x": 170, "y": 1050}, {"x": 220, "y": 1050}, {"x": 270, "y": 1050}, {"x": 320, "y": 1050}], "green": [{"x": 320, "y": 1050}, {"x": 370, "y": 1050}, {"x": 420, "y": 1050}, {"x": 470, "y": 1050}, {"x": 520, "y": 1050}], "yellow": [{"x": 520, "y": 1050}, {"x": 570, "y": 1050}, {"x": 620, "y": 1050}, {"x": 670, "y": 1050}, {"x": 720, "y": 1050}], "blue": [{"x": 720, "y": 1050}, {"x": 770, "y": 1050}, {"x": 820, "y": 1050}, {"x": 870, "y": 1050}, {"x": 920, "y": 1050}]};
 const ENTRY = {"red": "n3", "green": "n7", "yellow": "n11", "blue": "n15"};
@@ -429,6 +438,7 @@ const BARRS = ["n23", "n27", "n31", "n35", "n39", "n61", "n65", "n72", "n75", "n
 const NODE_BY_ID = Object.fromEntries(NODES.map(n=>[n.id,n]));
 const ADJ_SAFE = new Proxy(ADJ, { get: (t, k)=> t[k] || [] });
 
+// AJOUT : Fonction de sécurité pour éviter le blocage
 function getNodeById(id){ return NODE_BY_ID[id] || null; }
 
 const menu=document.getElementById('menu'), game=document.getElementById('game');
@@ -449,6 +459,7 @@ function blankState(){return{host:"",started:false,order:[],turnIndex:0,dice:0,w
 function ensure(st){ if(!st) st=blankState(); st.players=st.players||{}; st.colors=st.colors||{red:false,blue:false,green:false,yellow:false}; st.order=st.order||[]; st.barricades=st.barricades||[]; return st; }
 function log(t){ logEl.innerHTML = `<div>› ${t}</div>` + logEl.innerHTML; }
 
+// MENU actions
 mCreate.onclick = async ()=>{ const id=mGame.value.trim(), name=mName.value.trim(), color=mColor.value; if(!id||!name) return alert("Pseudo + code");
   ME=name; MYCOLOR=color; IS_HOST=true; gameRef=ref(db,"games/"+id);
   await set(gameRef, blankState());
@@ -482,7 +493,7 @@ function subscribe(id){
     lobbyList.innerHTML=""; Object.entries(st.players).forEach(([n,p])=>{ const d=document.createElement('div'); d.className='tag'; d.innerHTML=`<span class="dot" style="background:${COLORS[p.color]}"></span>${n}`; lobbyList.appendChild(d); });
     if(RST.started){ 
       menu.style.display="none"; 
-      /* On laisse le flex sur mobile, le CSS 'media query' forcera le grid sur PC */
+      /* ON GARDE FLEX COMME AVANT, SEUL LE CSS S'OCCUPE DU PC */
       game.style.display="flex"; 
     }
     drawState(RST);
@@ -747,6 +758,7 @@ svg.addEventListener('pointermove', e=>{ if(!pointers.has(e.pointerId)) return; 
 function endPtr(e){ pointers.delete(e.pointerId); if(pointers.size<2) pinchPrevDist=null; }
 svg.addEventListener('pointerup', endPtr); svg.addEventListener('pointercancel', endPtr); svg.addEventListener('pointerleave', endPtr);
 
+// Victory
 function __getTopGoalNodeId(){
   try{ if (!Array.isArray(NODES) || !NODES.length) return null; let top = NODES[0]; for (let i=1;i<NODES.length;i++){ if (NODES[i] && typeof NODES[i].y === 'number' && NODES[i].y < top.y) top = NODES[i]; } return top.id || null; }catch(e){ return null; }
 }
@@ -773,6 +785,7 @@ function __attachVictoryWatcherWhenReady(){
 }
 __attachVictoryWatcherWhenReady();
 
+// Click-catcher helpers
 (function(){
   if (window.__homeClickCatchersInstalledV2) return; window.__homeClickCatchersInstalledV2 = true;
   const CATCHER_SIZE = 36; 
