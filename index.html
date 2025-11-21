@@ -540,7 +540,7 @@ function drawState(st){
   diceEl.textContent=(st.dice||"—"); 
   const myTurn = st.order[st.turnIndex]===ME; 
   turnEl.textContent=(st.order[st.turnIndex]||"—")+(myTurn?" (Toi)":"");
-  turnEl.style.color = myTurn ? "var(--secondary)" : "inherit";
+  turnEl.style.color = "#ffffff";
   
   G_E.innerHTML=""; G_N.innerHTML=""; G_H.innerHTML=""; G_P.innerHTML=""; G_UI.innerHTML="";
   const mergedBarr = Array.from(new Set([...(st.barricades||[]), ...LOCAL_BARR_ADDS]));
