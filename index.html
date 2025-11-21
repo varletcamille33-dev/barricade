@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Malefiz — Battle Edition (Final Fix)</title>
+  <title>Malefiz — Battle Edition (Desktop Fix)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
-    /* --- VARIABLES & THEME --- */
+    /* --- VARIABLES & THEME (Identique à ton fichier index(6).html) --- */
     :root {
       --bg-main: #666e9b; 
       --bg-gradient: linear-gradient(135deg, #4c5482 0%, #fecfef 100%);
@@ -19,7 +19,7 @@
       --panel-bg: #ffffff;
       --text-main: #2d3436;
       --text-light: #636e72;
-      --primary: #ff7675; 
+      --primary: #ff7675;
       --primary-dark: #d63031;
       --secondary: #0984e3;
       --shadow-card: 0 10px 25px rgba(0,0,0,0.15);
@@ -40,7 +40,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      overflow: hidden; /* Mobile: bloqué */
+      overflow: hidden;
     }
 
     h3 { margin: 0 0 16px 0; font-weight: 700; color: var(--primary-dark); font-size: 1.4rem; text-align: center; }
@@ -56,7 +56,8 @@
       width: 90%;
       max-width: 600px;
       transition: transform 0.3s ease;
-      z-index: 100; /* S'assurer que le menu est au dessus */
+      /* Ajout pour s'assurer que le menu passe au dessus du reste si besoin */
+      z-index: 100;
       position: relative;
     }
 
@@ -121,7 +122,7 @@
       color: #aaa;
     }
 
-    /* --- GAME UI LAYOUT (BASE MOBILE - FLEX) --- */
+    /* --- GAME UI LAYOUT (DEFAULT MOBILE) --- */
     #game {
       width: 100%;
       height: 100%;
@@ -130,7 +131,7 @@
       border-radius: 0;
       background: transparent;
       box-shadow: none;
-      display: flex; /* Par défaut FLEX pour mobile */
+      display: flex;
       flex-direction: column;
       padding: 10px;
     }
@@ -180,7 +181,7 @@
       flex: 1;
       overflow: hidden;
       border-radius: 24px;
-      background: var(--board-bg); 
+      background: var(--board-bg);
       border: 6px solid rgba(255,255,255,0.4);
       box-shadow: inset 0 0 40px rgba(0,0,0,0.1);
       position: relative;
@@ -241,26 +242,846 @@
     }
 
     /* Overlay */
-    #winOverlay { backdrop-filter: blur(5px); background: rgba(0,0,0,0.2); display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:1000; justify-content:center; align-items:center; }
-    #winBox { box-shadow: 0 20px 60px rgba(0,0,0,0.15); border: none; text-align:center; max-width:400px; background:#fff; border-radius:24px; padding:30px; }
-    #winTitle { color: var(--primary); font-size: 2rem; margin:0; }
+    #winOverlay { backdrop-filter: blur(5px); background: rgba(0,0,0,0.2); }
+    #winBox { box-shadow: 0 20px 60px rgba(0,0,0,0.15); border: none; background:#fff; border-radius:24px; padding:20px; }
+    #winTitle { color: var(--primary); font-size: 2rem; }
 
-    /* =========================================================== */
-    /* 🚀 MEDIA QUERIES - LE FIX POUR ORDINATEUR (LARGE SCREEN) 🚀 */
-    /* =========================================================== */
+
+    /* ========================================================= */
+    /* 🖥️ AJOUT UNIQUEMENT POUR ORDINATEUR (Largeur > 1024px) 🖥️ */
+    /* ========================================================= */
     @media (min-width: 1024px) {
       body {
-        justify-content: center;
-        overflow: hidden; 
+        justify-content: center; /* Centre le jeu verticalement */
+        overflow: hidden; /* Empêche le scroll sur PC */
       }
 
-      /* FORCE L'AFFICHAGE GRILLE SUR PC avec !important */
+      /* On transforme le conteneur principal en Grille */
       #game {
-        display: grid !important; 
+        display: grid !important; /* Force l'affichage grille */
         height: 100vh;
         width: 100%;
         padding: 20px;
         gap: 20px;
+        /* 2 Colonnes : Plateau (prend toute la place) | Interface (fixe 380px) */
+        grid-template-columns: 1fr 380px;
+        /* 2 Lignes : HUD (Haut) | Logs (Bas) */
+        grid-template-rows: auto 1fr;
+        grid-template-areas: 
+          "board hud"
+          "board logs";
+      }
+
+      /* Le plateau prend toute la zone "board" (colonne de gauche) */
+      #wrap {
+        grid-area: board;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        border-width: 10px; /* Bordure un peu plus épaisse sur grand écran */
+      }
+
+      /* La barre du haut passe en haut à droite ("hud") */
+      .hud-bar {
+        grid-area: hud;
+        flex-direction: column; /* On empile les éléments verticalement */
+        align-items: stretch;
+        justify-content: center;
+        margin: 0;
+        padding: 20px;
+      }
+      /* Ajustement interne de la barre HUD pour PC */
+      .hud-bar .row { justify-content: space-between; width: 100%; margin-bottom: 10px; }
+      /* Bouton lancer plus gros */
+      #roll { width: 100%; font-size: 1.2em; padding: 15px; margin-top: 5px; }
+
+      /* Le panneau du bas passe en bas à droite ("logs") */
+      #bottom-panel {
+        grid-area: logs;
+        flex-direction: column; /* On empile Joueurs puis Chat */
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      /* Liste des joueurs */
+      .player-list {
+        min-height: auto;
+        max-height: 200px; /* Limite la hauteur si beaucoup de joueurs */
+        flex-shrink: 0;
+      }
+
+      /* Le chat prend tout l'espace restant en bas à droite */
+      #log {
+        height: 100%;
+        overflow-y: auto;
+        border: 4px solid rgba(255,255,255,0.5);
+      }
+      
+      /* Le menu d'accueil centré */
+      .card { margin: auto; max-width: 700px; }
+    }
+
+  </style>
+</head>
+<body>
+
+<section id="menu" class="card">
+  <h3>🎲 Malefiz • Lobby</h3>
+  
+  <div class="col">
+    <label>Qui es-tu ?</label>
+    <div class="row">
+      <input id="m_name" placeholder="Ton Pseudo" style="flex:2">
+      <select id="m_color" style="flex:1">
+        <option value="red">Rouge 🔴</option>
+        <option value="blue">Bleu 🔵</option>
+        <option value="green">Vert 🟢</option>
+        <option value="yellow">Jaune 🟡</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="col" style="margin-top:8px">
+    <label>Code de la partie</label>
+    <div class="row" style="align-items:center">
+      <input id="m_game" placeholder="ex: PizzaParty">
+    </div>
+  </div>
+
+  <div style="border-top: 2px dashed #eee; margin: 20px 0;"></div>
+
+  <div class="row" style="justify-content: center;">
+    <button id="m_create" class="primary">✨ Créer partie</button>
+    <button id="m_join">Rejoindre 🚀</button>
+  </div>
+
+  <div id="lobby" style="display:none; margin-top:20px; background:#fcf9f2; padding:15px; border-radius:16px;">
+    <div style="margin-bottom:8px; color:var(--text-light); font-size:0.9em;">Joueurs dans le salon :</div>
+    <div id="lobbyList" class="row" style="gap:8px"></div>
+    
+    <div class="row" style="margin-top:20px; justify-content:center; align-items:center; flex-direction:column; gap:10px">
+      <button id="m_start" class="primary" style="width:100%">Démarrer le jeu !</button>
+      <span class="notice" style="font-size:12px; color:var(--text-light)">Hôte uniquement • Min 2 joueurs</span>
+    </div>
+  </div>
+</section>
+
+<section id="game" style="display:none">
+  
+  <div class="hud-bar">
+    <div class="row" style="align-items:center; gap:15px">
+      <button id="roll" class="primary">🎲 Lancer</button>
+      <div class="dice-container">
+        <span style="font-size:0.8em; text-transform:uppercase; opacity:0.6">Dé</span>
+        <span id="diceVal" class="dice-val">—</span>
+      </div>
+    </div>
+    <div class="turn-indicator">C'est à <strong id="turn">—</strong></div>
+    <div id="phase" class="notice"></div>
+  </div>
+
+  <div id="wrap">
+    <svg id="svg" viewBox="0 0 1090 1300" xmlns="http://www.w3.org/2000/svg">
+      <g id="edges"></g>
+      <g id="nodes"></g>
+      <g id="homes"></g>
+      <g id="pieces"></g>
+      <g id="ui"></g>
+    </svg>
+  </div>
+
+  <div id="bottom-panel">
+    <div id="players" class="player-list"></div>
+    <div id="log">Bienvenue dans Malefiz !<br>En attente du lancer...</div>
+  </div>
+
+</section>
+
+<div id="winOverlay" role="dialog" aria-modal="true" style="display:none">
+  <div id="winBox" class="card" style="text-align:center; max-width:400px; margin:0;">
+    <div style="font-size:60px; margin-bottom:10px;">🏆</div>
+    <h2 id="winTitle">Victoire !</h2>
+    <p id="winMsg" style="line-height:1.6; color:#666; margin-bottom:20px;">Le talent parle.</p>
+    <button id="winClose" class="primary">Retour au menu</button>
+  </div>
+</div>
+
+<script type="module">
+/* --- CORRECTION CRITIQUE : Remplacement de 12.4.0 (inexistant) par 10.13.1 (stable) --- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import { getDatabase, ref, set, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+
+// ⚠️ CONFIG FIREBASE (Reste identique à la tienne)
+const firebaseConfig = {
+  apiKey: "AIzaSyDqZOF5bsuzH7dH3TvQiY9JknZWXYJsEE4",
+  authDomain: "barricade-en-ligne.firebaseapp.com",
+  databaseURL: "https://barricade-en-ligne-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "barricade-en-ligne",
+  storageBucket: "barricade-en-ligne.firebasestorage.app",
+  messagingSenderId: "1094029683667",
+  appId: "1:1094029683667:web:e3d6b9ad3b44b337d29d26"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const COLORS={red:"#FF5E5B",blue:"#4ECDC4",green:"#87D37C",yellow:"#FFD93D"};
+const NODES = [{"id": "n1", "x": 120, "y": 900, "n": 1}, {"id": "n2", "x": 170, "y": 900, "n": 2}, {"id": "n3", "x": 220, "y": 900, "n": 3}, {"id": "n4", "x": 270, "y": 900, "n": 4}, {"id": "n5", "x": 320, "y": 900, "n": 5}, {"id": "n6", "x": 370, "y": 900, "n": 6}, {"id": "n7", "x": 420, "y": 900, "n": 7}, {"id": "n8", "x": 470, "y": 900, "n": 8}, {"id": "n9", "x": 520, "y": 900, "n": 9}, {"id": "n10", "x": 570, "y": 900, "n": 10}, {"id": "n11", "x": 620, "y": 900, "n": 11}, {"id": "n12", "x": 670, "y": 900, "n": 12}, {"id": "n13", "x": 720, "y": 900, "n": 13}, {"id": "n14", "x": 770, "y": 900, "n": 14}, {"id": "n15", "x": 820, "y": 900, "n": 15}, {"id": "n16", "x": 870, "y": 900, "n": 16}, {"id": "n17", "x": 920, "y": 900, "n": 17}, {"id": "n18", "x": 120, "y": 840, "n": 18}, {"id": "n19", "x": 320, "y": 840, "n": 19}, {"id": "n20", "x": 520, "y": 840, "n": 20}, {"id": "n21", "x": 720, "y": 840, "n": 21}, {"id": "n22", "x": 920, "y": 840, "n": 22}, {"id": "n23", "x": 120, "y": 780, "n": 23}, {"id": "n24", "x": 170, "y": 780, "n": 24}, {"id": "n25", "x": 220, "y": 780, "n": 25}, {"id": "n26", "x": 270, "y": 780, "n": 26}, {"id": "n27", "x": 320, "y": 780, "n": 27}, {"id": "n28", "x": 370, "y": 780, "n": 28}, {"id": "n29", "x": 420, "y": 780, "n": 29}, {"id": "n30", "x": 470, "y": 780, "n": 30}, {"id": "n31", "x": 520, "y": 780, "n": 31}, {"id": "n32", "x": 570, "y": 780, "n": 32}, {"id": "n33", "x": 620, "y": 780, "n": 33}, {"id": "n34", "x": 670, "y": 780, "n": 34}, {"id": "n35", "x": 720, "y": 780, "n": 35}, {"id": "n36", "x": 770, "y": 780, "n": 36}, {"id": "n37", "x": 820, "y": 780, "n": 37}, {"id": "n38", "x": 870, "y": 780, "n": 38}, {"id": "n39", "x": 920, "y": 780, "n": 39}, {"id": "n40", "x": 220, "y": 720, "n": 40}, {"id": "n41", "x": 420, "y": 720, "n": 41}, {"id": "n42", "x": 620, "y": 720, "n": 42}, {"id": "n43", "x": 820, "y": 720, "n": 43}, {"id": "n44", "x": 220, "y": 660, "n": 44}, {"id": "n45", "x": 270, "y": 660, "n": 45}, {"id": "n46", "x": 320, "y": 660, "n": 46}, {"id": "n47", "x": 370, "y": 660, "n": 47}, {"id": "n48", "x": 420, "y": 660, "n": 48}, {"id": "n49", "x": 470, "y": 660, "n": 49}, {"id": "n50", "x": 520, "y": 660, "n": 50}, {"id": "n51", "x": 570, "y": 660, "n": 51}, {"id": "n52", "x": 620, "y": 660, "n": 52}, {"id": "n53", "x": 670, "y": 660, "n": 53}, {"id": "n54", "x": 720, "y": 660, "n": 54}, {"id": "n55", "x": 770, "y": 660, "n": 55}, {"id": "n56", "x": 820, "y": 660, "n": 56}, {"id": "n57", "x": 320, "y": 600, "n": 57}, {"id": "n58", "x": 720, "y": 600, "n": 58}, {"id": "n59", "x": 320, "y": 540, "n": 59}, {"id": "n60", "x": 370, "y": 540, "n": 60}, {"id": "n61", "x": 420, "y": 540, "n": 61}, {"id": "n62", "x": 470, "y": 540, "n": 62}, {"id": "n63", "x": 520, "y": 540, "n": 63}, {"id": "n64", "x": 570, "y": 540, "n": 64}, {"id": "n65", "x": 620, "y": 540, "n": 65}, {"id": "n66", "x": 670, "y": 540, "n": 66}, {"id": "n67", "x": 720, "y": 540, "n": 67}, {"id": "n68", "x": 420, "y": 480, "n": 68}, {"id": "n69", "x": 620, "y": 480, "n": 69}, {"id": "n70", "x": 420, "y": 420, "n": 70}, {"id": "n71", "x": 470, "y": 420, "n": 71}, {"id": "n72", "x": 520, "y": 420, "n": 72}, {"id": "n73", "x": 570, "y": 420, "n": 73}, {"id": "n74", "x": 620, "y": 420, "n": 74}, {"id": "n75", "x": 520, "y": 360, "n": 75}, {"id": "n76", "x": 120, "y": 300, "n": 76}, {"id": "n77", "x": 170, "y": 300, "n": 77}, {"id": "n78", "x": 220, "y": 300, "n": 78}, {"id": "n79", "x": 270, "y": 300, "n": 79}, {"id": "n80", "x": 320, "y": 300, "n": 80}, {"id": "n81", "x": 370, "y": 300, "n": 81}, {"id": "n82", "x": 420, "y": 300, "n": 82}, {"id": "n83", "x": 470, "y": 300, "n": 83}, {"id": "n84", "x": 520, "y": 300, "n": 84}, {"id": "n85", "x": 570, "y": 300, "n": 85}, {"id": "n86", "x": 620, "y": 300, "n": 86}, {"id": "n87", "x": 670, "y": 300, "n": 87}, {"id": "n88", "x": 720, "y": 300, "n": 88}, {"id": "n89", "x": 770, "y": 300, "n": 89}, {"id": "n90", "x": 820, "y": 300, "n": 90}, {"id": "n91", "x": 870, "y": 300, "n": 91}, {"id": "n92", "x": 920, "y": 300, "n": 92}, {"id": "n93", "x": 120, "y": 240, "n": 93}, {"id": "n94", "x": 920, "y": 240, "n": 94}, {"id": "n95", "x": 120, "y": 180, "n": 95}, {"id": "n96", "x": 170, "y": 180, "n": 96}, {"id": "n97", "x": 220, "y": 180, "n": 97}, {"id": "n98", "x": 270, "y": 180, "n": 98}, {"id": "n99", "x": 320, "y": 180, "n": 99}, {"id": "n100", "x": 370, "y": 180, "x": 100}, {"id": "n101", "x": 420, "y": 180, "n": 101}, {"id": "n102", "x": 470, "y": 180, "x": 102}, {"id": "n103", "x": 520, "y": 180, "n103}, {"id": "n104", "x": 570, "y": 180, "n": 104}, {"id": "n105", "x": 620, "y": 180, "n": 105}, {"id": "n106", "x": 670, 180, "n": 106}, {"id": "n107", "x": 720, "y": 180, "n": 107}, {"id": "n108", "x": 770, "y": 180, "n": 108}, {"id": "n109", "x": 820, "y": 180, "n": 109}, {"id": "n110", "x": 870, "y": 180, "n": 110}, {"id": "n111", "x": 920, 180, "n111}, {"id": "n112", "x": 520, "y": 120, "n112}];
+const ADJ = {"n112": ["n103"], "n95": ["n96", "n93"], "n96": ["n97", "n95"], "n97": ["n98", "n96"], "n98": ["n99", "n97"], "n99": ["n100", "n98"], "n100": ["n101", "n99"], "n101": ["n102", "n100"], "n102": ["n103", "n101"], "n103": ["n104", "n102", "n112"], "n104": ["n105", "n103"], "n105": ["n106", "n104"], "n106": ["n107", "n105"], "n107": ["n108", "n106"], "n108": ["n109", "n107"], "n109": ["n110", "n108"], "n110": ["n111", "n109"], "n111": ["n110", "n94"], "n93": ["n76", "n95"], "n94": ["n92", "n111"], "n76": ["n77", "n93"], "n77": ["n78", "n76"], "n78": ["n79", "n77"], "n79": ["n80", "n78"], "n80": ["n81", "n79"], "n81": ["n82", "n80"], "n82": ["n83", "n81"], "n83": ["n84", "n82"], "n84": ["n85", "n83", "n75"], "n85": ["n86", "n84"], "n86": ["n87", "n85"], "n87": ["n88", "n86"], "n88": ["n89", "n87"], "n89": ["n90", "n88"], "n90": ["n91", "n89"], "n91": ["n92", "n90"], "n92": ["n91", "n94"], "n75": ["n72", "n84"], "n70": ["n71", "n68"], "n71": ["n72", "n70"], "n72": ["n73", "n71", "n75"], "n73": ["n74", "n72"], "n74": ["n73", "n69"], "n68": ["n61", "n70"], "n69": ["n65", "n74"], "n59": ["n60", "n57"], "n60": ["n61", "n59"], "n61": ["n62", "n60", "n68"], "n62": ["n63", "n61"], "n63": ["n64", "n62"], "n64": ["n65", "n63"], "n65": ["n66", "n64", "n69"], "n66": ["n67", "n65"], "n67": ["n66", "n58"], "n57": ["n46", "n59"], "n58": ["n54", "n67"], "n44": ["n45", "n40"], "n45": ["n46", "n44"], "n46": ["n47", "n45", "n57"], "n47": ["n48", "n46"], "n48": ["n49", "n47", "n41"], "n49": ["n50", "n48"], "n50": ["n51", "n49"], "n51": ["n52", "n50"], "n52": ["n53", "n51", "n42"], "n53": ["n54", "n52"], "n54": ["n55", "n53", "n58"], "n55": ["n56", "n54"], "n56": ["n55", "n43"], "n40": ["n25", "n44"], "n41": ["n29", "n48"], "n42": ["n33", "n52"], "n43": ["n37", "n56"], "n23": ["n24", "n18"], "n24": ["n25", "n23"], "n25": ["n26", "n24", "n40"], "n26": ["n27", "n25"], "n27": ["n28", "n26", "n19"], "n28": ["n29", "n27"], "n29": ["n30", "n28", "n41"], "n30": ["n31", "n29"], "n31": ["n32", "n30", "n20"], "n32": ["n33", "n31"], "n33": ["n34", "n32", "n42"], "n34": ["n35", "n33"], "n35": ["n36", "n34", "n21"], "n36": ["n37", "n35"], "n37": ["n38", "n36", "n43"], "n38": ["n39", "n37"], "n39": ["n38", "n22"], "n18": ["n1", "n23"], "n19": ["n5", "n27"], "n20": ["n9", "n31"], "n21": ["n13", "n35"], "n22": ["n17", "n39"], "n1": ["n2", "n18"], "n2": ["n3", "n1"], "n3": ["n4", "n2"], "n4": ["n5", "n3"], "n5": ["n6", "n4", "n19"], "n6": ["n7", "n5"], "n7": ["n8", "n6"], "n8": ["n9", "n7"], "n9": ["n10", "n8", "n20"], "n10": ["n11", "n9"], "n11": ["n12", "n10"], "n12": ["n13", "n11"], "n13": ["n14", "n12", "n21"], "n14": ["n15", "n13"], "n15": ["n16", "n14"], "n16": ["n17", "n15"], "n17": ["n16", "n22"]};
+const HOMES = {"red": [{"x": 120, "y": 1050}, {"x": 170, "y": 1050}, {"x": 220, "y": 1050}, {"x": 270, "y": 1050}, {"x": 320, "y": 1050}], "green": [{"x": 320, "y": 1050}, {"x": 370, "y": 1050}, {"x": 420, "y": 1050}, {"x": 470, "y": 1050}, {"x": 520, "y": 1050}], "yellow": [{"x": 520, "y": 1050}, {"x": 570, "y": 1050}, {"x": 620, "y": 1050}, {"x": 670, "y": 1050}, {"x": 720, "y": 1050}], "blue": [{"x": 720, "y": 1050}, {"x": 770, "y": 1050}, {"x": 820, "y": 1050}, {"x": 870, "y": 1050}, {"x": 920, "y": 1050}]};
+const ENTRY = {"red": "n3", "green": "n7", "yellow": "n11", "blue": "n15"};
+const BARRS = ["n23", "n27", "n31", "n35", "n39", "n61", "n65", "n72", "n75", "n84", "n103"];
+
+const NODE_BY_ID = Object.fromEntries(NODES.map(n=>[n.id,n]));
+const ADJ_SAFE = new Proxy(ADJ, { get: (t, k)=> t[k] || [] });
+
+function getNodeById(id){ return NODE_BY_ID[id] || null; }
+
+const menu=document.getElementById('menu'), game=document.getElementById('game');
+const mName=document.getElementById('m_name'), mColor=document.getElementById('m_color'), mGame=document.getElementById('m_game');
+const mCreate=document.getElementById('m_create'), mJoin=document.getElementById('m_join'), mStart=document.getElementById('m_start');
+const lobby=document.getElementById('lobby'), lobbyList=document.getElementById('lobbyList');
+const svg=document.getElementById('svg'); const G_E=document.getElementById('edges'); const G_N=document.getElementById('nodes'); const G_H=document.getElementById('homes'); const G_P=document.getElementById('pieces'); const G_UI=document.getElementById('ui');
+const playersEl=document.getElementById('players'); 
+const diceEl=document.getElementById('diceVal'); 
+const turnEl=document.getElementById('turn'); const phaseEl=document.getElementById('phase'); const logEl=document.getElementById('log');
+const rollBtn = document.getElementById('roll');
+
+let ME="", MYCOLOR="red", gameRef=null, IS_HOST=false;
+let LOCAL_BARR_ADDS = new Set(); 
+let LOCAL_PLACE_DONE = false; 
+
+function blankState(){return{host:"",started:false,order:[],turnIndex:0,dice:0,winner:"",players:{},colors:{red:false,blue:false,green:false,yellow:false},barricades:[]}};
+function ensure(st){ if(!st) st=blankState(); st.players=st.players||{}; st.colors=st.colors||{red:false,blue:false,green:false,yellow:false}; st.order=st.order||[]; st.barricades=st.barricades||[]; return st; }
+function log(t){ logEl.innerHTML = `<div>› ${t}</div>` + logEl.innerHTML; }
+
+mCreate.onclick = async ()=>{ const id=mGame.value.trim(), name=mName.value.trim(), color=mColor.value; if(!id||!name) return alert("Pseudo + code");
+  ME=name; MYCOLOR=color; IS_HOST=true; gameRef=ref(db,"games/"+id);
+  await set(gameRef, blankState());
+  await runTransaction(gameRef,(st)=>{ st=ensure(st); st.host=name; st.players[name]={color,pawns:Array.from({length:5}).map(()=>({pos:"home",atHome:true})),won:false}; st.colors[color]=true; st.order=[name]; return st; });
+  subscribe(id); lobby.style.display="block";
+};
+mJoin.onclick = async ()=>{ const id=mGame.value.trim(), name=mName.value.trim(), color=mColor.value; if(!id||!name) return alert("Pseudo + code");
+  ME=name; MYCOLOR=color; IS_HOST=false; gameRef=ref(db,"games/"+id);
+  await runTransaction(gameRef,(st)=>{ st=ensure(st); if(st.started){alert("Partie déjà démarrée");return;} if(st.players[name]){alert("Pseudo déjà pris");return;} if(st.colors[color]){alert("Couleur déjà prise");return;} st.players[name]={color,pawns:Array.from({length:5}).map(()=>({pos:"home",atHome:true})),won:false}; st.colors[color]=true; st.order.push(name); return st; });
+  subscribe(id); lobby.style.display="block";
+};
+mStart.onclick = async ()=>{ if(!IS_HOST) return;
+  await runTransaction(gameRef,(st)=>{ st=ensure(st); if(Object.keys(st.players).length<2){alert("Au moins 2 joueurs"); return;} st.started=true; st.turnIndex=0; st.dice=0; st.winner=""; st.barricades=[...BARRS]; st._mustPlaceBarricade=false; st._placer=""; return st; });
+};
+
+function subscribe(id){
+  onValue(ref(db,"games/"+id),(snap)=>{
+    const st=ensure(snap.val());
+    if(st.barricades && st.barricades.length){
+      for(const b of [...LOCAL_BARR_ADDS]){
+        if(st.barricades.includes(b)) LOCAL_BARR_ADDS.delete(b);
+      }
+    }
+    let RST = st;
+    if(st._mustPlaceBarricade && st._placer===ME && LOCAL_PLACE_DONE){
+      RST = Object.assign({}, st, {_mustPlaceBarricade:false, _placer:""});
+    }
+    if(!st._mustPlaceBarricade){ LOCAL_PLACE_DONE = false; }
+
+    for(const o of [...mColor.options]) o.disabled = !!st.colors[o.value];
+    lobbyList.innerHTML=""; Object.entries(st.players).forEach(([n,p])=>{ const d=document.createElement('div'); d.className='tag'; d.innerHTML=`<span class="dot" style="background:${COLORS[p.color]}"></span>${n}`; lobbyList.appendChild(d); });
+    if(RST.started){ 
+      menu.style.display="none"; 
+      /* On laisse le display FLEX par défaut pour mobile. 
+         Le CSS s'occupera de passer en GRID sur PC grâce au @media. */
+      game.style.display="flex"; 
+    }
+    drawState(RST);
+    const myTurn = RST.order[RST.turnIndex]===ME;
+    const canRoll = RST.started && myTurn && !RST._mustPlaceBarricade && (!RST.dice || RST.dice===0);
+    rollBtn.disabled = !canRoll; rollBtn.style.opacity = canRoll ? "1" : ".5";
+    if(RST._mustPlaceBarricade && st._placer===ME){ phaseEl.textContent = "⚠️ Place une barricade !"; showBarricadeTargets(RST); }
+    else { phaseEl.textContent = ""; enableTurn(RST); }
+    autoSkipIfStuck(RST);
+  });
+}
+
+function drawEdges(){ G_E.innerHTML=""; for(const [a,ns] of Object.entries(ADJ_SAFE)){ const A=NODE_BY_ID[a]; if(!A) continue; ns.forEach(b=>{ if(a>b) return; const B=NODE_BY_ID[b]; if(!B) return; const L=document.createElementNS("http://www.w3.org/2000/svg","line"); L.setAttribute("x1",A.x); L.setAttribute("y1",A.y); L.setAttribute("x2",B.x); L.setAttribute("y2",B.y); L.setAttribute("class","edge"); G_E.appendChild(L); }); } }
+function drawNodes(){ G_N.innerHTML=""; for(const n of NODES){ const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",n.x); c.setAttribute("cy",n.y); c.setAttribute("r","22"); c.setAttribute("class","node"); G_N.appendChild(c); } }
+function drawHomes(){ G_H.innerHTML=""; for(const [col,arr] of Object.entries(HOMES)){ arr.forEach(p=>{ const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",p.x); c.setAttribute("cy",p.y); c.setAttribute("r","18"); c.setAttribute("fill",COLORS[col]); c.setAttribute("opacity","0.4"); G_H.appendChild(c); }); } }
+function drawBarricades(list){ (list||[]).forEach(id=>{ const n=NODE_BY_ID[id]; if(!n) return; const b=document.createElementNS("http://www.w3.org/2000/svg","circle"); b.setAttribute("cx",n.x); b.setAttribute("cy",n.y); b.setAttribute("r","18"); b.setAttribute("class","barricade"); G_P.appendChild(b); }); }
+
+function occByPlayer(players){ const map = new Map(); for(const [name,pl] of Object.entries(players)){ pl.pawns.forEach(p=>{ if(!p.atHome) map.set(p.pos, name); }); } return map; }
+function occSet(players){ return new Set([...occByPlayer(players).keys()]); }
+
+function drawPawns(st){ for(const [name,pl] of Object.entries(st.players)){ for(let i=0;i<pl.pawns.length;i++){ const p=pl.pawns[i]; let x,y; if(p.atHome){ const arr=HOMES[pl.color]; const spot=arr[Math.min(i,arr.length-1)]; x=spot.x; y=spot.y; } else { const n=NODE_BY_ID[p.pos]; if(!n) continue; x=n.x; y=n.y; } const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",x); c.setAttribute("cy",y); c.setAttribute("r","21"); c.setAttribute("fill",COLORS[pl.color]); c.setAttribute("class","pawn"); G_P.appendChild(c); const t=document.createElementNS("http://www.w3.org/2000/svg","text"); t.setAttribute("x",x); t.setAttribute("y",y+5); t.setAttribute("text-anchor","middle"); t.setAttribute("font-size","12"); t.setAttribute("class","pawn-text"); t.textContent=(i+1); G_P.appendChild(t); } } }
+
+function drawState(st){ 
+  playersEl.innerHTML=""; Object.entries(st.players).forEach(([n,p])=>{ const d=document.createElement('div'); d.className='tag'; d.innerHTML=`<span class="dot" style="background:${COLORS[p.color]}"></span>${n}`; playersEl.appendChild(d); });
+  diceEl.textContent=(st.dice||"—"); 
+  const myTurn = st.order[st.turnIndex]===ME; 
+  turnEl.textContent=(st.order[st.turnIndex]||"—")+(myTurn?" (Toi)":"");
+  turnEl.style.color = myTurn ? "var(--secondary)" : "inherit";
+  
+  G_E.innerHTML=""; G_N.innerHTML=""; G_H.innerHTML=""; G_P.innerHTML=""; G_UI.innerHTML="";
+  const mergedBarr = Array.from(new Set([...(st.barricades||[]), ...LOCAL_BARR_ADDS]));
+  drawEdges(); drawNodes(); drawHomes(); drawBarricades(mergedBarr); drawPawns(st); 
+}
+
+function exactReachRules(start, steps, passBlocked, finalForbidden){ 
+  const res=new Set();
+  function dfs(cur, remaining, visited){
+    if(remaining===0){ res.add(cur); return; }
+    for(const nxt of (ADJ_SAFE[cur]||[])){ 
+      if(visited.has(nxt)) continue;
+      if(remaining>1){ 
+        if(passBlocked.has(nxt)) continue; 
+        visited.add(nxt); dfs(nxt, remaining-1, visited); visited.delete(nxt);
+      } else { 
+        if(finalForbidden.has(nxt)) continue; 
+        visited.add(nxt); dfs(nxt, 0, visited); visited.delete(nxt);
+      }
+    }
+  }
+  const v=new Set([start]); dfs(start, steps, v);
+  return [...res];
+}
+
+function hasAnyLegalMove(st, playerName) {
+  const pl = st.players[playerName];
+  if (!pl) return false;
+  const dice = st.dice || 0;
+  if (dice <= 0) return false;
+  const myOcc = new Set(pl.pawns.filter(p => !p.atHome).map(p => p.pos));
+  const barrSet = new Set(st.barricades || []);
+  const globalOcc = occSet(st.players);
+  const entry = ENTRY[pl.color];
+  for (let i = 0; i < pl.pawns.length; i++) {
+    const p = pl.pawns[i];
+    if (p.atHome) {
+      const steps = dice - 1; 
+      if (steps === 0) {
+        if (!globalOcc.has(entry) && !barrSet.has(entry)) return true;
+      } else if (steps > 0) {
+        const targets = exactReachRules(entry, steps, barrSet, myOcc);
+        if (targets.length > 0) return true;
+      }
+    } else {
+      const targets = exactReachRules(p.pos, dice, barrSet, myOcc);
+      if (targets.length > 0) return true;
+    }
+  }
+  return false;
+}
+
+function autoSkipIfStuck(st) {
+  if (st.order[st.turnIndex] !== ME) return;
+  if (!st.started) return;
+  if (st._mustPlaceBarricade) return;
+  if (!st.dice || st.dice === 0) return;
+  if (hasAnyLegalMove(st, ME)) return;
+  runTransaction(gameRef, (cur) => {
+    cur = ensure(cur);
+    if (cur.order[cur.turnIndex] !== ME) return cur;
+    if (cur._mustPlaceBarricade) return cur;
+    if (!cur.dice || cur.dice === 0) return cur;
+    if (hasAnyLegalMove(cur, ME)) return cur;
+    cur.dice = 0;
+    cur.turnIndex = (cur.turnIndex + 1) % cur.order.length;
+    return cur;
+  });
+  log("Bloqué ! Tour passé.");
+}
+
+rollBtn.onclick = async ()=>{ await runTransaction(gameRef,(st)=>{ st=ensure(st); if(!st.started) return st; if(st.order[st.turnIndex]!==ME) return st; if(st._mustPlaceBarricade) return st; if(st.dice && st.dice>0) return st; st.dice=Math.floor(Math.random()*6)+1; return st; }); };
+
+let currentSelect = null;
+
+function addOriginHalo(x,y,onclick){ 
+  const o=document.createElementNS("http://www.w3.org/2000/svg","circle"); 
+  o.setAttribute("cx",x); o.setAttribute("cy",y); o.setAttribute("r","28"); 
+  o.setAttribute("class","hint-origin"); 
+  o.onclick = onclick;
+  o.onmousedown = (e) => { e.preventDefault(); e.stopPropagation(); onclick(); };
+  o.ontouchstart = (e) => { e.preventDefault(); e.stopPropagation(); onclick(); };
+  G_UI.appendChild(o); 
+}
+
+function addSelectRing(x,y){ const s=document.createElementNS("http://www.w3.org/2000/svg","circle"); s.setAttribute("cx",x); s.setAttribute("cy",y); s.setAttribute("r","32"); s.setAttribute("class","select-ring"); s.setAttribute("data-role","select-ring"); G_UI.appendChild(s); }
+function clearTargets(){ [...svg.querySelectorAll(".hint-target,[data-role='select-ring'],.hint-origin,.hint-label")].forEach(n=>n.remove()); }
+
+function addTargetHalo(x,y,onclick){ 
+  const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); 
+  c.setAttribute("cx",x); c.setAttribute("cy",y); c.setAttribute("r","28"); 
+  c.setAttribute("class","hint-target"); 
+  c.onclick = onclick;
+  c.onmousedown = (e) => { e.preventDefault(); e.stopPropagation(); onclick(); };
+  c.ontouchstart = (e) => { e.preventDefault(); e.stopPropagation(); onclick(); };
+  G_UI.appendChild(c); 
+}
+
+function enableTurn(st){
+  if(st.order[st.turnIndex]!==ME) return;
+  if(!st.dice || st.dice===0) return;
+  if(st._mustPlaceBarricade) return;
+  clearTargets();
+  currentSelect = null;
+  const my = st.players[ME];
+  const myOcc = new Set();
+  my.pawns.forEach(p=>{ if(!p.atHome) myOcc.add(p.pos); });
+  const globalOcc = occSet(st.players);
+  const barrSet = new Set(st.barricades||[]);
+
+  my.pawns.forEach((p,idx)=>{
+    if(p.atHome){
+      const entry = ENTRY[my.color];
+      const myEndsForbidden = new Set(my.pawns.filter(pp=>!pp.atHome).map(pp=>pp.pos));
+      const steps = Math.max(0, (st.dice||0) - 1);
+      let targets = [];
+      if (steps === 0) {
+        const occ = new Set([...(Object.values(st.players||{}).flatMap(pl => (pl.pawns||[]).filter(pp=>!pp.atHome).map(pp=>pp.pos)))]);
+        const barrSetEntry = new Set(st.barricades||[]);
+        if (!occ.has(entry) && !barrSetEntry.has(entry)) targets = [entry];
+      } else {
+        targets = exactReachRules(entry, steps, new Set(st.barricades||[]), myEndsForbidden);
+      }
+      if (targets.length > 0) {
+        const spot = HOMES[my.color][Math.min(idx, HOMES[my.color].length-1)];
+        addOriginHalo(spot.x, spot.y, ()=>{
+          clearTargets();
+          addSelectRing(spot.x, spot.y);
+          targets.forEach(id=>{
+            const t = NODE_BY_ID[id];
+            addTargetHalo(t.x, t.y, ()=> movePawnFromHomeToTarget(st, idx, id));
+          });
+        });
+      }
+    } else {
+      const n = NODE_BY_ID[p.pos];
+      addOriginHalo(n.x,n.y,()=>{
+        clearTargets();
+        addSelectRing(n.x,n.y);
+        const targets = exactReachRules(p.pos, st.dice, barrSet, myOcc);
+        targets.forEach(id=>{
+          const t = NODE_BY_ID[id];
+          addTargetHalo(t.x,t.y,()=> movePawnOnBoard(st, idx, id));
+        });
+      });
+    }
+  });
+}
+
+function movePawnFromHomeToTarget(st, pawnIndex, destId){ transactMove(st, pawnIndex, "home", destId); }
+function movePawnOnBoard(st, pawnIndex, destId){ const p = st.players[ME].pawns[pawnIndex]; transactMove(st, pawnIndex, p.pos, destId); }
+
+function transactMove(st, pawnIndex, from, to){
+  runTransaction(gameRef, (cur)=>{
+    cur = ensure(cur);
+    if(cur.order[cur.turnIndex]!==ME) return cur;
+    if(cur._mustPlaceBarricade) return cur;
+    if(!cur.dice || cur.dice===0) return cur;
+    const me = cur.players[ME];
+    if(!me) return cur;
+    const pawn = me.pawns[pawnIndex];
+    if(!pawn) return cur;
+    const occ = occSet(cur.players);
+    const barrSet = new Set(cur.barricades||[]);
+    if(to!=="home"){ if(occ.has(to) && occByPlayer(cur.players).get(to)===ME) return cur; }
+    if(occ.has(to)){
+      const owner = occByPlayer(cur.players).get(to);
+      if(owner && owner!==ME){
+        const opp = cur.players[owner];
+        const idx = (opp.pawns||[]).findIndex(pp=>!pp.atHome && pp.pos===to);
+        if(idx>=0){ opp.pawns[idx] = {pos:"home", atHome:true}; log("Pion "+owner+" mangé !"); }
+      }
+    }
+    if(pawn.atHome){ pawn.atHome = false; pawn.pos = to; } else { pawn.pos = to; }
+    if(barrSet.has(to)){
+      cur.barricades = (cur.barricades||[]).filter(id=>id!==to);
+      cur._mustPlaceBarricade = true;
+      cur._placer = ME;
+    } else {
+      cur.dice = 0;
+      cur.turnIndex = (cur.turnIndex + 1) % cur.order.length;
+    }
+    return cur;
+  });
+}
+
+function showBarricadeTargets(st){
+  clearTargets();
+  const occ = occSet(st.players);
+  const barrSet = new Set([...(st.barricades||[]), ...LOCAL_BARR_ADDS]);
+  const bottomY = Math.max(...NODES.map(n=>n.y));
+  NODES.forEach(n=>{
+    const id = n.id;
+    if(n.y === bottomY) return; 
+    if(occ.has(id)) return;
+    if(barrSet.has(id)) return;
+    addTargetHalo(n.x,n.y,()=> placeBarricade(st, id));
+  });
+}
+
+function placeBarricade(st, nodeId){
+  const node = getNodeById(nodeId);
+  const bottomY = Math.max(...NODES.map(n=>n.y));
+  if(node && node.y === bottomY) return;
+  LOCAL_BARR_ADDS.add(nodeId);
+  LOCAL_PLACE_DONE = true;
+  drawState(Object.assign({}, st, { barricades: [...(st.barricades||[]), nodeId] }));
+  runTransaction(gameRef, (cur)=>{
+    cur = ensure(cur);
+    if(!cur._mustPlaceBarricade || cur._placer!==ME) return cur;
+    const occ = occSet(cur.players);
+    const barrSet = new Set(cur.barricades||[]);
+    const node = getNodeById(nodeId);
+    const bottomY = Math.max(...NODES.map(n=>n.y));
+    if(occ.has(nodeId)) return cur;
+    if(barrSet.has(nodeId)) return cur;
+    if(node && node.y === bottomY) return cur;
+    cur.barricades = [...(cur.barricades||[]), nodeId];
+    cur._mustPlaceBarricade = false;
+    cur._placer = "";
+    cur.dice = 0;
+    cur.turnIndex = (cur.turnIndex + 1) % cur.order.length;
+    return cur;
+  });
+}
+
+let view = { x:0, y:0, w:1090, h:1300 };
+function applyView(){ svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`); }
+applyView();
+svg.addEventListener('wheel', e=>{ e.preventDefault(); const scale = (e.deltaY>0)? 1.1 : 0.9; const mx = view.x + (e.offsetX/svg.clientWidth)*view.w; const my = view.y + (e.offsetY/svg.clientHeight)*view.h; view.w*=scale; view.h*=scale; view.x = mx - (e.offsetX/svg.clientWidth)*view.w; view.y = my - (e.offsetY/svg.clientHeight)*view.h; applyView(); }, {passive:false});
+const pointers = new Map(); let pinchPrevDist = null;
+svg.addEventListener('pointerdown', e=>{ pointers.set(e.pointerId, e); svg.setPointerCapture(e.pointerId); });
+svg.addEventListener('pointermove', e=>{ if(!pointers.has(e.pointerId)) return; pointers.set(e.pointerId, e); if(pointers.size===2){ const [p1,p2] = [...pointers.values()]; const dx = p2.clientX - p1.clientX; const dy = p2.clientY - p1.clientY; const dist = Math.hypot(dx,dy); const midX = (p1.clientX + p2.clientX)/2; const midY = (p1.clientY + p2.clientY)/2; const mx = view.x + (midX/svg.clientWidth)*view.w; const my = view.y + (midY/svg.clientHeight)*view.h; if(pinchPrevDist!==null && dist>0){ const scale = pinchPrevDist/dist; view.w*=scale; view.h*=scale; view.x = mx - (midX/svg.clientWidth)*view.w; view.y = my - (midY/svg.clientHeight)*view.h; applyView(); } pinchPrevDist = dist; } });
+function endPtr(e){ pointers.delete(e.pointerId); if(pointers.size<2) pinchPrevDist=null; }
+svg.addEventListener('pointerup', endPtr); svg.addEventListener('pointercancel', endPtr); svg.addEventListener('pointerleave', endPtr);
+
+function __getTopGoalNodeId(){
+  try{ if (!Array.isArray(NODES) || !NODES.length) return null; let top = NODES[0]; for (let i=1;i<NODES.length;i++){ if (NODES[i] && typeof NODES[i].y === 'number' && NODES[i].y < top.y) top = NODES[i]; } return top.id || null; }catch(e){ return null; }
+}
+const __TOP_NODE_ID = __getTopGoalNodeId();
+const __winOverlay = document.getElementById('winOverlay'); const __winTitle = document.getElementById('winTitle'); const __winMsg = document.getElementById('winMsg'); const __winClose = document.getElementById('winClose');
+if (__winClose) __winClose.onclick = ()=>{ __winOverlay.style.display = 'none'; menu.style.display="block"; game.style.display="none"; };
+function __showVictoryOverlay(__winnerName){ if (!__winOverlay) return; __winTitle.textContent = `Victoire : ${__winnerName} !`; __winOverlay.style.display = 'flex'; }
+let __victoryWatcherAttached = false;
+function __attachVictoryWatcherWhenReady(){
+  if (__victoryWatcherAttached) return; if (typeof gameRef === 'undefined' || !gameRef) { setTimeout(__attachVictoryWatcherWhenReady, 250); return; }
+  __victoryWatcherAttached = true;
+  onValue(gameRef, (snap)=>{
+    const st = (typeof ensure === 'function') ? ensure(snap.val()) : (snap.val() || {});
+    if (!st || !st.players) return;
+    if (st.winner && String(st.winner).length){ __showVictoryOverlay(st.winner); return; }
+    const goal = __TOP_NODE_ID; if (!goal) return;
+    let reachedBy = "";
+    for (const [name, pl] of Object.entries(st.players || {})){
+      const pawns = pl && Array.isArray(pl.pawns) ? pl.pawns : [];
+      if (pawns.some(p => p && !p.atHome && p.pos === goal)){ reachedBy = name; break; }
+    }
+    if (reachedBy){ runTransaction(gameRef, (cur)=>{ cur = (typeof ensure === 'function') ? ensure(cur) : (cur || {}); if (!cur.winner) { cur.winner = reachedBy; cur.dice = 0; } return cur; }); }
+  });
+}
+__attachVictoryWatcherWhenReady();
+
+(function(){
+  if (window.__homeClickCatchersInstalledV2) return; window.__homeClickCatchersInstalledV2 = true;
+  const CATCHER_SIZE = 36; 
+  function getBoardHost(){ return document.getElementById('game') || document.body; }
+  function getBoardRect(){ const host = getBoardHost(); if (!host) return null; return host.getBoundingClientRect(); }
+  function computeMapper(){
+    try{ if (!Array.isArray(NODES) || !NODES.length) return null; let minX=NODES[0].x, maxX=NODES[0].x, minY=NODES[0].y, maxY=NODES[0].y; for (let i=1;i<NODES.length;i++){ const n = NODES[i]; if (!n) continue; if (n.x < minX) minX = n.x; if (n.x > maxX) maxX = n.x; if (n.y < minY) minY = n.y; if (n.y > maxY) maxY = n.y; } const rect = getBoardRect(); if (!rect) return null; const sx = (maxX - minX) || 1; const sy = (maxY - minY) || 1; const kx = rect.width / sx; const ky = rect.height / sy; const k = Math.min(kx, ky); const offsetX = rect.left + window.scrollX + (rect.width - k * sx)/2; const offsetY = rect.top  + window.scrollY + (rect.height - k * sy)/2; return function toPx(pt){ return { x: offsetX + (pt.x - minX) * k, y: offsetY + (pt.y - minY) * k }; }; }catch(e){ console.error("mapper error", e); return null; }
+  }
+  function placeClickCatcherAtGameCoord(coord, onhit){
+    const map = computeMapper(); if (!map) return; const p = map(coord); const div = document.createElement('div'); div.className = 'home-click-catcher'; div.style.position = 'absolute'; div.style.left = (p.x - CATCHER_SIZE/2) + 'px'; div.style.top  = (p.y - CATCHER_SIZE/2) + 'px'; div.style.width = CATCHER_SIZE + 'px'; div.style.height = CATCHER_SIZE + 'px'; div.style.zIndex = 9998; div.style.background = 'transparent'; div.style.pointerEvents = 'auto'; div.style.touchAction = 'manipulation';
+    ['click','pointerdown','mousedown','touchstart'].forEach(evt => { div.addEventListener(evt, (e)=>{ try{ e.preventDefault(); e.stopPropagation(); }catch(_){} try{ onhit && onhit(); }catch(err){ console.error(err); } }, {passive:false}); }); document.body.appendChild(div);
+  }
+  function clearClickCatchers(){ document.querySelectorAll('.home-click-catcher').forEach(el=>el.remove()); }
+  window.__placeHomeClickCatcherAtGameCoord = placeClickCatcherAtGameCoord; window.__clearHomeClickCatchers = clearClickCatchers;
+})();
+(function(){
+  if (window.__wrapClearTargetsInstalled) return; window.__wrapClearTargetsInstalled = true;
+  if (typeof clearTargets === 'function'){ const _orig = clearTargets; window.clearTargets = function(){ try{ window.__clearHomeClickCatchers && window.__clearHomeClickCatchers(); }catch(_){} return _orig.apply(this, arguments); } }
+})();
+</script>
+</body>
+</html>
+
+dans la version que je t'ai envoyé (la 6) les bouton marchent donc il ne faut pas y toucher, du coup es tu sur du code que tu m'a envoyé ?
+
+C'est entendu. Vous avez tout à fait raison : si la version 6 fonctionne chez vous (notamment les boutons et la connexion), c'est qu'il ne faut surtout pas modifier le "moteur" du jeu (JavaScript et Firebase).
+
+Il est probable que la version "12.4.0" de Firebase fonctionne grâce à votre cache ou une configuration spécifique, et en la modifiant j'ai cassé le lien. Je m'en excuse.
+
+Voici donc le code strictement basé sur votre fichier index(6).html.
+
+    JavaScript : Je n'ai rien touché. J'ai remis exactement votre code (Firebase 12.4.0, vos fonctions, etc.). Les boutons fonctionneront comme avant.
+
+    CSS (Mise en page) : J'ai ajouté uniquement le bloc "Spécial Ordinateur" à la fin du style. C'est la seule différence. Cela va forcer le plateau à prendre toute la place à gauche sur les écrans larges.
+
+Copiez ce code, il devrait résoudre le problème d'affichage sans rien casser d'autre :
+HTML
+
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Malefiz — Battle Edition (Desktop Fix V6)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* --- VARIABLES & THEME (Conservé de la V6) --- */
+    :root {
+      --bg-main: #666e9b; 
+      --bg-gradient: linear-gradient(135deg, #4c5482 0%, #fecfef 100%);
+      --board-bg: #4c5482; 
+      --board-border: #55efc4;
+      --panel-bg: #ffffff;
+      --text-main: #2d3436;
+      --text-light: #636e72;
+      --primary: #ff7675;
+      --primary-dark: #d63031;
+      --secondary: #0984e3;
+      --shadow-card: 0 10px 25px rgba(0,0,0,0.15);
+      --p-red: #ff4757;
+      --p-blue: #2e86de;
+      --p-green: #2ed573;
+      --p-yellow: #ffa502;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      margin: 0;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      font-family: 'Fredoka', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    h3 { margin: 0 0 16px 0; font-weight: 700; color: var(--primary-dark); font-size: 1.4rem; text-align: center; }
+
+    /* --- CONTAINERS & CARDS --- */
+    .card {
+      background: var(--panel-bg);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      border: 4px solid #fff;
+      margin: 16px;
+      width: 90%;
+      max-width: 600px;
+      transition: transform 0.3s ease;
+      z-index: 100;
+      position: relative;
+    }
+
+    .row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .col { display: flex; flex-direction: column; gap: 8px; }
+
+    /* --- FORM ELEMENTS --- */
+    label { font-size: 13px; font-weight: 600; color: var(--text-light); margin-left: 4px; }
+    
+    input, select {
+      font-family: inherit;
+      font-size: 16px;
+      border-radius: 16px;
+      border: 2px solid #dfe6e9;
+      background: #f1f2f6;
+      padding: 12px 16px;
+      color: var(--text-main);
+      width: 100%;
+      transition: all 0.2s;
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: var(--secondary);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(9, 132, 227, 0.15);
+    }
+
+    /* --- BUTTONS --- */
+    button {
+      border: none;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 12px 20px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: relative;
+      top: 0;
+      background: #dfe6e9;
+      color: #636e72;
+      box-shadow: 0 4px 0 #b2bec3;
+    }
+    button:active:not(:disabled) { top: 4px; box-shadow: 0 0 0 #b2bec3; }
+
+    button.primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 0 var(--primary-dark);
+    }
+    button.primary:active:not(:disabled) { top: 4px; box-shadow: 0 0 0 var(--primary-dark); }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+      top: 4px;
+      background: #eee;
+      color: #aaa;
+    }
+
+    /* --- GAME UI LAYOUT (Mobile par défaut) --- */
+    #game {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      margin: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+    }
+
+    /* Top Bar (HUD) */
+    .hud-bar {
+      background: #fff;
+      padding: 10px 16px;
+      border-radius: 20px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      z-index: 10;
+    }
+
+    .dice-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffeaa7;
+      padding: 6px 12px;
+      border-radius: 14px;
+      font-weight: 700;
+      border: 2px solid #fdcb6e;
+    }
+    .dice-val { font-size: 1.2em; color: #d35400; }
+    
+    .turn-indicator { font-size: 14px; color: var(--text-light); }
+    .turn-indicator strong { color: var(--text-main); font-size: 1.1em; }
+
+    #phase.notice {
+      background: var(--text-main);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn { from {transform: scale(0.8); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+
+    /* Board Wrapper */
+    #wrap {
+      flex: 1;
+      overflow: hidden;
+      border-radius: 24px;
+      background: var(--board-bg);
+      border: 6px solid rgba(255,255,255,0.4);
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.1);
+      position: relative;
+      touch-action: none;
+    }
+    
+    #svg { display: block; width: 100%; height: 100%; cursor: grab; }
+    #svg:active { cursor: grabbing; }
+
+    /* SVG Elements */
+    .edge { stroke: rgba(255,255,255,0.2); stroke-width: 8; stroke-linecap: round; }
+    .node { fill: #ffffff; stroke-width: 0; transition: fill 0.2s; }
+    .barricade { fill: #2d3436; stroke: #636e72; stroke-width: 2; filter: drop-shadow(2px 4px 3px rgba(0,0,0,0.3)); }
+    .pawn { stroke: rgba(255,255,255,0.8); stroke-width: 3; transition: transform 0.2s; paint-order: stroke; }
+    .pawn-text { fill: #fff; font-weight: 700; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+
+    /* Hints */
+    .hint-origin { fill: rgba(255, 255, 255, 0.2); stroke: #fff; stroke-width: 3; stroke-dasharray: 5,5; cursor: pointer; }
+    .hint-target { fill: rgba(85, 239, 196, 0.3); stroke: #55efc4; stroke-width: 4; cursor: pointer; }
+    .select-ring { fill: none; stroke: #fff; stroke-width: 4; }
+    .hint-label { font-family: 'Fredoka', sans-serif; font-weight: 700; fill: var(--text-main); text-anchor: middle; }
+
+    /* Log & Players */
+    #bottom-panel {
+      display: flex;
+      gap: 12px;
+      height: 140px;
+      margin-top: 10px;
+    }
+    .player-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      min-width: 120px;
+    }
+    .tag {
+      padding: 6px 10px;
+      border-radius: 12px;
+      background: #ffffff;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 2px solid rgba(255,255,255,0.5); }
+    
+    #log {
+      flex: 1;
+      background: rgba(255,255,255,0.8);
+      border-radius: 16px;
+      padding: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-main);
+    }
+
+    /* Overlay */
+    #winOverlay { backdrop-filter: blur(5px); background: rgba(0,0,0,0.2); }
+    #winBox { box-shadow: 0 20px 60px rgba(0,0,0,0.15); border: none; background:#fff; border-radius:24px; padding:20px; }
+    #winTitle { color: var(--primary); font-size: 2rem; }
+
+    /* ========================================= */
+    /* 🖥️ AJOUT ORDINATEUR (GRID LAYOUT) 🖥️ */
+    /* ========================================= */
+    @media (min-width: 1024px) {
+      body {
+        justify-content: center;
+        overflow: hidden; /* Pas de scroll sur PC */
+      }
+
+      #game {
+        display: grid !important; /* Active la grille */
+        height: 100vh;
+        width: 100%;
+        padding: 20px;
+        gap: 20px;
+        /* Plateau à gauche (max) | UI à droite (380px) */
         grid-template-columns: 1fr 380px;
         grid-template-rows: auto 1fr;
         grid-template-areas: 
@@ -279,17 +1100,19 @@
       .hud-bar {
         grid-area: hud;
         flex-direction: column;
-        margin: 0;
-        padding: 20px;
         align-items: stretch;
         justify-content: center;
+        margin: 0;
+        padding: 20px;
       }
       
       .hud-bar .row {
         justify-content: space-between;
         width: 100%;
+        margin-bottom: 10px;
       }
-      #roll { width: 100%; padding: 15px; font-size: 1.1em; margin-bottom: 10px; }
+
+      #roll { width: 100%; font-size: 1.2em; padding: 15px; }
 
       #bottom-panel {
         grid-area: logs;
@@ -301,18 +1124,17 @@
 
       .player-list {
         min-height: auto;
-        max-height: 200px; 
+        max-height: 200px;
+        width: 100%;
       }
+
       #log {
         height: 100%;
         overflow-y: auto;
         border: 4px solid rgba(255,255,255,0.5);
       }
       
-      .card {
-        margin: auto;
-        max-width: 700px;
-      }
+      .card { margin: auto; max-width: 700px; }
     }
   </style>
 </head>
@@ -390,8 +1212,8 @@
 
 </section>
 
-<div id="winOverlay" role="dialog" aria-modal="true">
-  <div id="winBox" class="card">
+<div id="winOverlay" role="dialog" aria-modal="true" style="display:none">
+  <div id="winBox" class="card" style="text-align:center; max-width:400px; margin:0;">
     <div style="font-size:60px; margin-bottom:10px;">🏆</div>
     <h2 id="winTitle">Victoire !</h2>
     <p id="winMsg" style="line-height:1.6; color:#666; margin-bottom:20px;">Le talent parle.</p>
@@ -400,9 +1222,9 @@
 </div>
 
 <script type="module">
-/* CORRECTION DE LA VERSION FIREBASE (12.4.0 N'EXISTE PAS ENCORE, RETOUR A 10.12.2) */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+/* --- RESTAURATION DE VOTRE VERSION ORIGINALE V6 (Firebase 12.4.0) --- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
 // ⚠️ CONFIG FIREBASE
 const firebaseConfig = {
@@ -419,7 +1241,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 const COLORS={red:"#FF5E5B",blue:"#4ECDC4",green:"#87D37C",yellow:"#FFD93D"};
-const NODES = [{"id": "n1", "x": 120, "y": 900, "n": 1}, {"id": "n2", "x": 170, "y": 900, "n": 2}, {"id": "n3", "x": 220, "y": 900, "n": 3}, {"id": "n4", "x": 270, "y": 900, "n": 4}, {"id": "n5", "x": 320, "y": 900, "n": 5}, {"id": "n6", "x": 370, "y": 900, "n": 6}, {"id": "n7", "x": 420, "y": 900, "n": 7}, {"id": "n8", "x": 470, "y": 900, "n": 8}, {"id": "n9", "x": 520, "y": 900, "n": 9}, {"id": "n10", "x": 570, "y": 900, "n": 10}, {"id": "n11", "x": 620, "y": 900, "n": 11}, {"id": "n12", "x": 670, "y": 900, "n": 12}, {"id": "n13", "x": 720, "y": 900, "n": 13}, {"id": "n14", "x": 770, "y": 900, "n": 14}, {"id": "n15", "x": 820, "y": 900, "n": 15}, {"id": "n16", "x": 870, "y": 900, "n": 16}, {"id": "n17", "x": 920, "y": 900, "n": 17}, {"id": "n18", "x": 120, "y": 840, "n": 18}, {"id": "n19", "x": 320, "y": 840, "n": 19}, {"id": "n20", "x": 520, "y": 840, "n": 20}, {"id": "n21", "x": 720, "y": 840, "n": 21}, {"id": "n22", "x": 920, "y": 840, "n": 22}, {"id": "n23", "x": 120, "y": 780, "n": 23}, {"id": "n24", "x": 170, "y": 780, "n": 24}, {"id": "n25", "x": 220, "y": 780, "n": 25}, {"id": "n26", "x": 270, "y": 780, "n": 26}, {"id": "n27", "x": 320, "y": 780, "n": 27}, {"id": "n28", "x": 370, "y": 780, "n": 28}, {"id": "n29", "x": 420, "y": 780, "n": 29}, {"id": "n30", "x": 470, "y": 780, "n": 30}, {"id": "n31", "x": 520, "y": 780, "n": 31}, {"id": "n32", "x": 570, "y": 780, "n": 32}, {"id": "n33", "x": 620, "y": 780, "n": 33}, {"id": "n34", "x": 670, "y": 780, "n": 34}, {"id": "n35", "x": 720, "y": 780, "n": 35}, {"id": "n36", "x": 770, "y": 780, "n": 36}, {"id": "n37", "x": 820, "y": 780, "n": 37}, {"id": "n38", "x": 870, "y": 780, "n": 38}, {"id": "n39", "x": 920, "y": 780, "n": 39}, {"id": "n40", "x": 220, "y": 720, "n": 40}, {"id": "n41", "x": 420, "y": 720, "n": 41}, {"id": "n42", "x": 620, "y": 720, "n": 42}, {"id": "n43", "x": 820, "y": 720, "n": 43}, {"id": "n44", "x": 220, "y": 660, "n": 44}, {"id": "n45", "x": 270, "y": 660, "n": 45}, {"id": "n46", "x": 320, "y": 660, "n": 46}, {"id": "n47", "x": 370, "y": 660, "n": 47}, {"id": "n48", "x": 420, "y": 660, "n": 48}, {"id": "n49", "x": 470, "y": 660, "n": 49}, {"id": "n50", "x": 520, "y": 660, "n": 50}, {"id": "n51", "x": 570, "y": 660, "n": 51}, {"id": "n52", "x": 620, "y": 660, "n": 52}, {"id": "n53", "x": 670, "y": 660, "n": 53}, {"id": "n54", "x": 720, "y": 660, "n": 54}, {"id": "n55", "x": 770, "y": 660, "n": 55}, {"id": "n56", "x": 820, "y": 660, "n": 56}, {"id": "n57", "x": 320, "y": 600, "n": 57}, {"id": "n58", "x": 720, "y": 600, "n": 58}, {"id": "n59", "x": 320, "y": 540, "n": 59}, {"id": "n60", "x": 370, "y": 540, "n": 60}, {"id": "n61", "x": 420, "y": 540, "n": 61}, {"id": "n62", "x": 470, "y": 540, "n": 62}, {"id": "n63", "x": 520, "y": 540, "n": 63}, {"id": "n64", "x": 570, "y": 540, "n": 64}, {"id": "n65", "x": 620, "y": 540, "n": 65}, {"id": "n66", "x": 670, "y": 540, "n": 66}, {"id": "n67", "x": 720, "y": 540, "n": 67}, {"id": "n68", "x": 420, "y": 480, "n": 68}, {"id": "n69", "x": 620, "y": 480, "n": 69}, {"id": "n70", "x": 420, "y": 420, "n": 70}, {"id": "n71", "x": 470, "y": 420, "n": 71}, {"id": "n72", "x": 520, "y": 420, "n": 72}, {"id": "n73", "x": 570, "y": 420, "x": 73}, {"id": "n74", "x": 620, "y": 420, "n": 74}, {"id": "n75", "x": 520, "y": 360, "x": 75}, {"id": "n76", "x": 120, "y": 300, "n": 76}, {"id": "n77", "x": 170, "y": 300, "n": 77}, {"id": "n78", "x": 220, "y": 300, "n": 78}, {"id": "n79", "x": 270, "y": 300, "n": 79}, {"id": "n80", "x": 320, "y": 300, "n": 80}, {"id": "n81", "x": 370, "y": 300, "n": 81}, {"id": "n82", "x": 420, "y": 300, "n": 82}, {"id": "n83", "x": 470, "y": 300, "n": 83}, {"id": "n84", "x": 520, "y": 300, "n": 84}, {"id": "n85", "x": 570, "y": 300, "n": 85}, {"id": "n86", "x": 620, "y": 300, "n": 86}, {"id": "n87", "x": 670, "y": 300, "n": 87}, {"id": "n88", "x": 720, "y": 300, "n": 88, {"id": "n89", "x": 770, "y": 300, "n": 89}, {"id": "n90", "x": 820, "y": 300, "n": 90}, {"id": "n91", "x": 870, "y": 300, "n": 91}, {"id": "n92", "x": 920, 300, "n": 92}, {"id": "n93", "x": 120, "y": 240, "n": 93}, {"id": "n94", "x": 920, "y": 240, "n": 94}, {"id": "n95", "x": 120, "y": 180, "n": 95}, {"id": "n96", "x": 170, "y": 180, "n": 96}, {"id": "n97", "x": 220, "y": 180, "n": 97}, {"id": "n98", "x": 270, "y": 180, "n": 98}, {"id": "n99", "x": 320, "y": 180, "n": 99}, {"id": "n100", "x": 370, "y": 180, "n": 100}, {"id": "n101", "x": 420, "y": 180, "n": 101}, {"id": "n102", "x": 470, "y": 180, "n": 102}, {"id": "n103", "x": 520, "y": 180, "n103}, {"id": "n104", "x": 570, "y": 180, "n": 104}, {"id": "n105", "x": 620, "y": 180, "n": 105}, {"id": "n106", "x": 670, "y": 180, "n": 106}, {"id": "n107", "x": 720, "y": 180, "n": 107}, {"id": "n108", "x": 770, "y": 180, "n": 108}, {"id": "n109", "x": 820, "y": 180, "n": 109}, {"id": "n110", "x": 870, "y": 180, "n": 110}, {"id": "n111", "x": 920, 180, "n111}, {"id": "n112", "x": 520, "y": 120, "n112}];
+const NODES = [{"id": "n1", "x": 120, "y": 900, "n": 1}, {"id": "n2", "x": 170, "y": 900, "n": 2}, {"id": "n3", "x": 220, "y": 900, "n": 3}, {"id": "n4", "x": 270, "y": 900, "n": 4}, {"id": "n5", "x": 320, "y": 900, "n": 5}, {"id": "n6", "x": 370, "y": 900, "n": 6}, {"id": "n7", "x": 420, "y": 900, "n": 7}, {"id": "n8", "x": 470, "y": 900, "n": 8}, {"id": "n9", "x": 520, "y": 900, "n": 9}, {"id": "n10", "x": 570, "y": 900, "n": 10}, {"id": "n11", "x": 620, "y": 900, "n": 11}, {"id": "n12", "x": 670, "y": 900, "n": 12}, {"id": "n13", "x": 720, "y": 900, "n": 13}, {"id": "n14", "x": 770, "y": 900, "n": 14}, {"id": "n15", "x": 820, "y": 900, "n": 15}, {"id": "n16", "x": 870, "y": 900, "n": 16}, {"id": "n17", "x": 920, "y": 900, "n": 17}, {"id": "n18", "x": 120, "y": 840, "n": 18}, {"id": "n19", "x": 320, "y": 840, "n": 19}, {"id": "n20", "x": 520, "y": 840, "n": 20}, {"id": "n21", "x": 720, "y": 840, "n": 21}, {"id": "n22", "x": 920, "y": 840, "n": 22}, {"id": "n23", "x": 120, "y": 780, "n": 23}, {"id": "n24", "x": 170, "y": 780, "n": 24}, {"id": "n25", "x": 220, "y": 780, "n": 25}, {"id": "n26", "x": 270, "y": 780, "n": 26}, {"id": "n27", "x": 320, "y": 780, "n": 27}, {"id": "n28", "x": 370, "y": 780, "n": 28}, {"id": "n29", "x": 420, "y": 780, "n": 29}, {"id": "n30", "x": 470, "y": 780, "n": 30}, {"id": "n31", "x": 520, "y": 780, "n": 31}, {"id": "n32", "x": 570, "y": 780, "n": 32}, {"id": "n33", "x": 620, "y": 780, "n": 33}, {"id": "n34", "x": 670, "y": 780, "n": 34}, {"id": "n35", "x": 720, "y": 780, "n": 35}, {"id": "n36", "x": 770, "y": 780, "n": 36}, {"id": "n37", "x": 820, "y": 780, "n": 37}, {"id": "n38", "x": 870, "y": 780, "n": 38}, {"id": "n39", "x": 920, "y": 780, "n": 39}, {"id": "n40", "x": 220, "y": 720, "n": 40}, {"id": "n41", "x": 420, "y": 720, "n": 41}, {"id": "n42", "x": 620, "y": 720, "n": 42}, {"id": "n43", "x": 820, "y": 720, "n": 43}, {"id": "n44", "x": 220, "y": 660, "n": 44}, {"id": "n45", "x": 270, "y": 660, "n": 45}, {"id": "n46", "x": 320, "y": 660, "n": 46}, {"id": "n47", "x": 370, "y": 660, "n": 47}, {"id": "n48", "x": 420, "y": 660, "n": 48}, {"id": "n49", "x": 470, "y": 660, "n": 49}, {"id": "n50", "x": 520, "y": 660, "n": 50}, {"id": "n51", "x": 570, "y": 660, "n": 51}, {"id": "n52", "x": 620, "y": 660, "n": 52}, {"id": "n53", "x": 670, "y": 660, "n": 53}, {"id": "n54", "x": 720, "y": 660, "n": 54}, {"id": "n55", "x": 770, "y": 660, "n": 55}, {"id": "n56", "x": 820, "y": 660, "n": 56}, {"id": "n57", "x": 320, "y": 600, "n": 57}, {"id": "n58", "x": 720, "y": 600, "n": 58}, {"id": "n59", "x": 320, "y": 540, "n": 59}, {"id": "n60", "x": 370, "y": 540, "n": 60}, {"id": "n61", "x": 420, "y": 540, "n": 61}, {"id": "n62", "x": 470, "y": 540, "n": 62}, {"id": "n63", "x": 520, "y": 540, "n": 63}, {"id": "n64", "x": 570, "y": 540, "n": 64}, {"id": "n65", "x": 620, "y": 540, "n": 65}, {"id": "n66", "x": 670, "y": 540, "n": 66}, {"id": "n67", "x": 720, "y": 540, "n": 67}, {"id": "n68", "x": 420, "y": 480, "n": 68}, {"id": "n69", "x": 620, "y": 480, "n": 69}, {"id": "n70", "x": 420, "y": 420, "n": 70}, {"id": "n71", "x": 470, "y": 420, "n": 71}, {"id": "n72", "x": 520, "y": 420, "n": 72}, {"id": "n73", "x": 570, "y": 420, "n": 73}, {"id": "n74", "x": 620, "y": 420, "n": 74}, {"id": "n75", "x": 520, "y": 360, "n": 75}, {"id": "n76", "x": 120, "y": 300, "n": 76}, {"id": "n77", "x": 170, "y": 300, "n77}, {"id": "n78", "x": 220, "y": 300, "n78}, {"id": "n79", "x": 270, "y": 300, "n": 79}, {"id": "n80", "x": 320, "y": 300, "n": 80}, {"id": "n81", "x": 370, "y": 300, "n": 81}, {"id": "n82", "x": 420, "y": 300, "n": 82}, {"id": "n83", "x": 470, "y": 300, "n": 83}, {"id": "n84", "x": 520, "y": 300, "n": 84}, {"id": "n85", "x": 570, "y": 300, "n": 85}, {"id": "n86", "x": 620, "y": 300, "n": 86}, {"id": "n87", "x": 670, "y": 300, "n": 87}, {"id": "n88", "x": 720, "y": 300, "n": 88}, {"id": "n89", "x": 770, "y": 300, "n": 89}, {"id": "n90", "x": 820, "y": 300, "n": 90}, {"id": "n91", "x": 870, "y": 300, "n": 91}, {"id": "n92", "x": 920, "y": 300, "n": 92}, {"id": "n93", "x": 120, "y": 240, "n": 93}, {"id": "n94", "x": 920, "y": 240, "n": 94}, {"id": "n95", "x": 120, "y": 180, "n": 95}, {"id": "n96", "x": 170, "y": 180, "n": 96}, {"id": "n97", "x": 220, "y": 180, "n": 97}, {"id": "n98", "x": 270, "y": 180, "n": 98}, {"id": "n99", "x": 320, "y": 180, "n": 99}, {"id": "n100", "x": 370, "y": 180, "n": 100}, {"id": "n101", "x": 420, 180, "n": 101}, {"id": "n102", "x": 470, 180, "n": 102}, {"id": "n103", "x": 520, "y": 180, "n103}, {"id": "n104", "x": 570, "y": 180, "n": 104}, {"id": "n105", "x": 620, "y": 180, "n": 105}, {"id": "n106", "x": 670, "y": 180, "n": 106}, {"id": "n107", "x": 720, 180, "n": 107}, {"id": "n108", "x": 770, "y": 180, "n": 108}, {"id": "n109", "x": 820, "y": 180, "n": 109}, {"id": "n110", "x": 870, "y": 180, "n": 110}, {"id": "n111", "x": 920, 180, "n111}, {"id": "n112", "x": 520, "y": 120, "n112}];
 const ADJ = {"n112": ["n103"], "n95": ["n96", "n93"], "n96": ["n97", "n95"], "n97": ["n98", "n96"], "n98": ["n99", "n97"], "n99": ["n100", "n98"], "n100": ["n101", "n99"], "n101": ["n102", "n100"], "n102": ["n103", "n101"], "n103": ["n104", "n102", "n112"], "n104": ["n105", "n103"], "n105": ["n106", "n104"], "n106": ["n107", "n105"], "n107": ["n108", "n106"], "n108": ["n109", "n107"], "n109": ["n110", "n108"], "n110": ["n111", "n109"], "n111": ["n110", "n94"], "n93": ["n76", "n95"], "n94": ["n92", "n111"], "n76": ["n77", "n93"], "n77": ["n78", "n76"], "n78": ["n79", "n77"], "n79": ["n80", "n78"], "n80": ["n81", "n79"], "n81": ["n82", "n80"], "n82": ["n83", "n81"], "n83": ["n84", "n82"], "n84": ["n85", "n83", "n75"], "n85": ["n86", "n84"], "n86": ["n87", "n85"], "n87": ["n88", "n86"], "n88": ["n89", "n87"], "n89": ["n90", "n88"], "n90": ["n91", "n89"], "n91": ["n92", "n90"], "n92": ["n91", "n94"], "n75": ["n72", "n84"], "n70": ["n71", "n68"], "n71": ["n72", "n70"], "n72": ["n73", "n71", "n75"], "n73": ["n74", "n72"], "n74": ["n73", "n69"], "n68": ["n61", "n70"], "n69": ["n65", "n74"], "n59": ["n60", "n57"], "n60": ["n61", "n59"], "n61": ["n62", "n60", "n68"], "n62": ["n63", "n61"], "n63": ["n64", "n62"], "n64": ["n65", "n63"], "n65": ["n66", "n64", "n69"], "n66": ["n67", "n65"], "n67": ["n66", "n58"], "n57": ["n46", "n59"], "n58": ["n54", "n67"], "n44": ["n45", "n40"], "n45": ["n46", "n44"], "n46": ["n47", "n45", "n57"], "n47": ["n48", "n46"], "n48": ["n49", "n47", "n41"], "n49": ["n50", "n48"], "n50": ["n51", "n49"], "n51": ["n52", "n50"], "n52": ["n53", "n51", "n42"], "n53": ["n54", "n52"], "n54": ["n55", "n53", "n58"], "n55": ["n56", "n54"], "n56": ["n55", "n43"], "n40": ["n25", "n44"], "n41": ["n29", "n48"], "n42": ["n33", "n52"], "n43": ["n37", "n56"], "n23": ["n24", "n18"], "n24": ["n25", "n23"], "n25": ["n26", "n24", "n40"], "n26": ["n27", "n25"], "n27": ["n28", "n26", "n19"], "n28": ["n29", "n27"], "n29": ["n30", "n28", "n41"], "n30": ["n31", "n29"], "n31": ["n32", "n30", "n20"], "n32": ["n33", "n31"], "n33": ["n34", "n32", "n42"], "n34": ["n35", "n33"], "n35": ["n36", "n34", "n21"], "n36": ["n37", "n35"], "n37": ["n38", "n36", "n43"], "n38": ["n39", "n37"], "n39": ["n38", "n22"], "n18": ["n1", "n23"], "n19": ["n5", "n27"], "n20": ["n9", "n31"], "n21": ["n13", "n35"], "n22": ["n17", "n39"], "n1": ["n2", "n18"], "n2": ["n3", "n1"], "n3": ["n4", "n2"], "n4": ["n5", "n3"], "n5": ["n6", "n4", "n19"], "n6": ["n7", "n5"], "n7": ["n8", "n6"], "n8": ["n9", "n7"], "n9": ["n10", "n8", "n20"], "n10": ["n11", "n9"], "n11": ["n12", "n10"], "n12": ["n13", "n11"], "n13": ["n14", "n12", "n21"], "n14": ["n15", "n13"], "n15": ["n16", "n14"], "n16": ["n17", "n15"], "n17": ["n16", "n22"]};
 const HOMES = {"red": [{"x": 120, "y": 1050}, {"x": 170, "y": 1050}, {"x": 220, "y": 1050}, {"x": 270, "y": 1050}, {"x": 320, "y": 1050}], "green": [{"x": 320, "y": 1050}, {"x": 370, "y": 1050}, {"x": 420, "y": 1050}, {"x": 470, "y": 1050}, {"x": 520, "y": 1050}], "yellow": [{"x": 520, "y": 1050}, {"x": 570, "y": 1050}, {"x": 620, "y": 1050}, {"x": 670, "y": 1050}, {"x": 720, "y": 1050}], "blue": [{"x": 720, "y": 1050}, {"x": 770, "y": 1050}, {"x": 820, "y": 1050}, {"x": 870, "y": 1050}, {"x": 920, "y": 1050}]};
 const ENTRY = {"red": "n3", "green": "n7", "yellow": "n11", "blue": "n15"};
@@ -481,7 +1303,8 @@ function subscribe(id){
     lobbyList.innerHTML=""; Object.entries(st.players).forEach(([n,p])=>{ const d=document.createElement('div'); d.className='tag'; d.innerHTML=`<span class="dot" style="background:${COLORS[p.color]}"></span>${n}`; lobbyList.appendChild(d); });
     if(RST.started){ 
       menu.style.display="none"; 
-      game.style.display="flex"; /* ICI ON GARDE FLEX pour mobile, le CSS FORCE GRID sur PC */
+      /* On laisse le flex sur mobile, le CSS 'media query' forcera le grid sur PC */
+      game.style.display="flex"; 
     }
     drawState(RST);
     const myTurn = RST.order[RST.turnIndex]===ME;
