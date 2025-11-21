@@ -12,33 +12,32 @@
   <style>
     /* --- THEME VITAMIN POP --- */
     :root {
-      /* COULEURS VIVES MAIS DOUCES */
-      --bg-gradient-1: #f6d365; /* Jaune doux */
-      --bg-gradient-2: #fda085; /* Pêche */
+      /* FOND DE PAGE : Dégradé Pêche / Abricot (Chaleureux et lumineux) */
+      --bg-gradient-1: #fab1a0; 
+      --bg-gradient-2: #ffeaa7;
       
-      /* LE PLATEAU (Bleu Lagon pour contraster avec les pions/cases) */
-      --board-bg: #00b894; 
-      --board-border: #00a884;
+      /* PLATEAU : VIOLET MAUVE (Contraste parfait avec les 4 couleurs de pions) */
+      --board-bg: #6c5ce7; 
+      --board-border: #a29bfe;
       
-      /* PANNEAUX (Blanc teinté pour ne pas être éblouissant) */
-      --panel-bg: #fffef0; 
+      /* INTERFACE */
+      --panel-bg: #fff; 
       --text-main: #2d3436;
       --text-light: #636e72;
       
-      /* ACTIONS */
-      --btn-primary: #e84393; /* Rose Bonbon */
-      --btn-primary-shadow: #d63080;
-      --btn-secondary: #6c5ce7; /* Violet cool */
-      --btn-secondary-shadow: #5849c4;
+      /* BOUTONS */
+      --btn-primary: #e17055; /* Terra Cotta / Orange brûlé */
+      --btn-primary-shadow: #d35400;
+      --btn-secondary: #0984e3; /* Bleu électrique */
+      --btn-secondary-shadow: #0768b5;
       
-      --shadow-card: 0 10px 20px rgba(0,0,0,0.15);
+      --shadow-card: 0 12px 24px rgba(0,0,0,0.15);
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     
     body {
       margin: 0;
-      /* Fond coloré Pêche/Mangue */
       background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
       color: var(--text-main);
       font-family: 'Fredoka', sans-serif;
@@ -49,19 +48,25 @@
       overflow: hidden;
     }
 
-    h3 { margin: 0 0 16px 0; font-weight: 700; color: var(--btn-secondary); font-size: 1.6rem; text-align: center; text-shadow: 0 2px 0 rgba(255,255,255,0.5); }
+    h3 { 
+      margin: 0 0 16px 0; 
+      font-weight: 700; 
+      color: var(--board-bg); /* Titre de la couleur du plateau pour rappel */
+      font-size: 1.6rem; 
+      text-align: center; 
+      text-shadow: 2px 2px 0px rgba(255,255,255,0.4);
+    }
 
-    /* --- CARTES --- */
+    /* --- CARTES (Structure conservée) --- */
     .card {
       background: var(--panel-bg);
       border-radius: 24px;
       padding: 24px;
       box-shadow: var(--shadow-card);
-      border: 4px solid #fff;
+      border: 4px solid #fff; /* Bordure blanche épaisse style sticker */
       margin: 16px;
       width: 90%;
       max-width: 600px;
-      position: relative;
     }
 
     .row { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -76,7 +81,7 @@
       font-weight: 600;
       border-radius: 16px;
       border: 3px solid #dfe6e9;
-      background: #fff;
+      background: #f9f9f9;
       padding: 10px 16px;
       color: var(--text-main);
       width: 100%;
@@ -84,18 +89,19 @@
       transition: all 0.2s;
     }
     input:focus, select:focus {
-      border-color: var(--btn-secondary);
-      box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.2);
+      border-color: var(--board-bg);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
     }
 
-    /* --- BOUTONS FUN --- */
+    /* --- BOUTONS --- */
     button {
       border: none;
       font-family: inherit;
       font-weight: 700;
       font-size: 15px;
       padding: 12px 24px;
-      border-radius: 50px; /* Boutons très ronds */
+      border-radius: 50px;
       cursor: pointer;
       transition: transform 0.1s;
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -106,30 +112,30 @@
       color: white;
     }
     
-    /* Bouton Principal (Créer, Lancer) - Rose */
+    /* Bouton Principal */
     button.primary {
       background: var(--btn-primary);
-      box-shadow: 0 5px 0 var(--btn-primary-shadow);
+      box-shadow: 0 6px 0 var(--btn-primary-shadow);
     }
-    button.primary:active:not(:disabled) { top: 5px; box-shadow: 0 0 0 var(--btn-primary-shadow); }
+    button.primary:active:not(:disabled) { top: 6px; box-shadow: 0 0 0 var(--btn-primary-shadow); }
 
-    /* Bouton Secondaire (Rejoindre) - Violet */
+    /* Bouton Secondaire */
     button {
       background: var(--btn-secondary);
-      box-shadow: 0 5px 0 var(--btn-secondary-shadow);
+      box-shadow: 0 6px 0 var(--btn-secondary-shadow);
     }
-    button:active:not(:disabled) { top: 5px; box-shadow: 0 0 0 var(--btn-secondary-shadow); }
+    button:active:not(:disabled) { top: 6px; box-shadow: 0 0 0 var(--btn-secondary-shadow); }
 
     button:disabled {
-      opacity: 0.5;
+      opacity: 0.6;
       cursor: not-allowed;
       box-shadow: none;
-      top: 5px;
+      top: 6px;
       background: #b2bec3;
-      filter: grayscale(0.5);
+      filter: grayscale(1);
     }
 
-    /* --- JEU --- */
+    /* --- ZONE DE JEU --- */
     #game {
       width: 100%;
       height: 100%;
@@ -145,7 +151,7 @@
 
     /* HUD */
     .hud-bar {
-      background: var(--panel-bg);
+      background: #fff;
       padding: 10px 16px;
       border-radius: 20px;
       box-shadow: var(--shadow-card);
@@ -156,7 +162,7 @@
       margin-bottom: 10px;
       flex-wrap: wrap;
       z-index: 10;
-      border: 3px solid #fff;
+      border: 2px solid #ecf0f1;
     }
 
     .dice-container {
@@ -166,11 +172,12 @@
       border-radius: 14px;
       font-weight: 800;
       border: 2px solid #fdcb6e;
+      display: flex; align-items: center; gap: 6px;
     }
-    .dice-val { font-size: 1.3em; }
+    .dice-val { font-size: 1.4em; line-height: 1; }
     
     .turn-indicator { font-size: 14px; color: var(--text-light); font-weight: 600; }
-    .turn-indicator strong { color: var(--btn-secondary); font-size: 1.1em; }
+    .turn-indicator strong { color: var(--board-bg); font-size: 1.1em; }
 
     #phase.notice {
       background: var(--text-main);
@@ -181,15 +188,14 @@
       font-weight: 600;
     }
 
-    /* --- LE PLATEAU (Ici on change la couleur) --- */
+    /* --- PLATEAU VIOLET --- */
     #wrap {
       flex: 1;
       overflow: hidden;
       border-radius: 24px;
-      /* Fond BLEU LAGON pour faire ressortir les pions */
-      background: var(--board-bg);
-      border: 6px solid rgba(255,255,255,0.4);
-      box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+      background: var(--board-bg); /* Le fond Violet */
+      border: 6px solid rgba(255,255,255,0.3);
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.2);
       position: relative;
       touch-action: none;
     }
@@ -197,62 +203,67 @@
     #svg { display: block; width: 100%; height: 100%; cursor: grab; }
     #svg:active { cursor: grabbing; }
 
-    /* --- ELEMENTS GRAPHIQUES --- */
+    /* Eléments du plateau */
     .edge { 
-      stroke: rgba(255,255,255,0.3); /* Chemins en blanc transparent */
+      stroke: rgba(255,255,255,0.25); /* Chemins blancs translucides */
       stroke-width: 8; 
       stroke-linecap: round; 
     }
     
-    /* Cases : BLANCHES pour le contraste */
+    /* Les CASES (Ronds) */
     .node { 
-      fill: #ffffff; 
-      stroke: #00b894; /* Bordure de la couleur du fond pour effet "cutout" */
-      stroke-width: 0; /* ou fine bordure */
-      /* On va tricher : stroke noir très léger ou pas de stroke */
+      fill: #ffffff; /* Blanc pur pour bien ressortir sur le violet */
+      stroke: transparent; 
+      stroke-width: 0;
+      /* Petite ombre pour donner du volume */
+      filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.2));
     }
-    /* Pour mieux voir, on met une petite ombre portée sur les nodes via CSS ? Non, SVG. 
-       On va mettre un stroke un peu plus foncé que le fond */
-    .node { stroke: rgba(0,0,0,0.1); stroke-width: 2; }
 
-    /* Barricades : Noires brillantes */
+    /* Barricades */
     .barricade { 
       fill: #2d3436; 
       stroke: #636e72; 
       stroke-width: 2; 
     }
     
-    /* Pions : Couleurs Peps avec contour blanc */
+    /* Pions */
     .pawn { 
       stroke: #fff; 
       stroke-width: 3; 
       paint-order: stroke; 
-      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: transform 0.2s;
     }
     .pawn-text { fill: #fff; font-weight: 800; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.4); font-size: 12px; }
 
-    /* Aides visuelles */
+    /* --- INTERACTION & FIX ANIMATION --- */
+    
+    /* Zone cliquable autour des pions (Halo) */
     .hint-origin {
-      fill: rgba(255, 255, 255, 0.3);
+      fill: rgba(255, 255, 255, 0.25); /* Halo blanc léger */
       stroke: #fff;
       stroke-width: 3;
-      stroke-dasharray: 6,6;
-      animation: rotateRing 8s linear infinite;
+      stroke-dasharray: 6,4;
       cursor: pointer;
+      /* ANIMATION SUPPRIMÉE pour faciliter la sélection */
+      /* Juste une transition douce au survol/touch */
+      transition: opacity 0.2s;
     }
+    .hint-origin:hover { opacity: 0.8; stroke-width: 4; }
+
+    /* Cibles de déplacement */
     .hint-target {
-      fill: rgba(255, 234, 167, 0.4); /* Jaune transparent */
-      stroke: #ffeaa7;
+      fill: rgba(85, 239, 196, 0.3); /* Vert menthe transparent */
+      stroke: #55efc4;
       stroke-width: 4;
       cursor: pointer;
-      animation: pulse 1.2s infinite;
+      /* Pulsation douce conservée car elle n'affecte pas la position */
+      animation: pulse 1.5s infinite;
     }
     .select-ring { fill: none; stroke: #fff; stroke-width: 4; }
 
-    @keyframes rotateRing { to { transform: rotate(360deg); transform-origin: center; } }
-    @keyframes pulse { 0% {r: 24px; opacity: 0.6;} 50% {r: 28px; opacity: 1;} 100% {r: 24px; opacity: 0.6;} }
+    @keyframes pulse { 0% {r: 24px; opacity: 0.6;} 50% {r: 27px; opacity: 1;} 100% {r: 24px; opacity: 0.6;} }
 
-    /* --- LOGS --- */
+    /* --- BAS DE PAGE --- */
     #bottom-panel {
       display: flex;
       gap: 12px;
@@ -270,30 +281,30 @@
       padding: 8px 12px;
       border-radius: 12px;
       background: rgba(255,255,255,0.9);
-      border: none;
       font-size: 13px;
       font-weight: 700;
       display: flex;
       align-items: center;
       color: var(--text-main);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
     .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 2px solid rgba(0,0,0,0.1); }
     
     #log {
       flex: 1;
-      background: rgba(255,255,255,0.8);
-      border: none;
+      background: rgba(255,255,255,0.85);
       border-radius: 16px;
       padding: 12px;
       font-size: 13px;
       line-height: 1.5;
       color: var(--text-main);
+      overflow-y: auto;
     }
 
-    /* Victoire */
-    #winOverlay { backdrop-filter: blur(8px); background: rgba(0,0,0,0.2); }
-    #winBox { box-shadow: 0 20px 60px rgba(0,0,0,0.2); border: none; background: #fff; }
-    #winTitle { color: var(--btn-primary); font-size: 2.5rem; }
+    /* Modal Victoire */
+    #winOverlay { backdrop-filter: blur(5px); background: rgba(0,0,0,0.3); }
+    #winBox { box-shadow: 0 20px 60px rgba(0,0,0,0.3); border: none; background: #fff; }
+    #winTitle { color: var(--btn-primary); font-size: 2.5rem; margin-top: 0; }
 
   </style>
 </head>
@@ -346,7 +357,7 @@
     <div class="row" style="align-items:center; gap:15px">
       <button id="roll" class="primary">🎲 Lancer</button>
       <div class="dice-container">
-        <span style="font-size:0.7em; text-transform:uppercase; opacity:0.7; display:block;">Dé</span>
+        <span style="font-size:0.7em; text-transform:uppercase; opacity:0.7;">Dé</span>
         <span id="diceVal" class="dice-val">—</span>
       </div>
       <div class="turn-indicator">Tour : <strong id="turn">—</strong></div>
@@ -398,19 +409,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// COULEURS VIBRANTES
-const COLORS={red:"#ff7675",blue:"#74b9ff",green:"#55efc4",yellow:"#ffeaa7"};
+// PALETTE : Bleu Cyan (plus clair) pour contraster avec le violet, Vert Menthe, Rouge Corail, Jaune Soleil
+const COLORS={red:"#ff7675",blue:"#00cec9",green:"#55efc4",yellow:"#ffeaa7"};
 
-const NODES = [{"id": "n1", "x": 120, "y": 900, "n": 1}, {"id": "n2", "x": 170, "y": 900, "n": 2}, {"id": "n3", "x": 220, "y": 900, "n": 3}, {"id": "n4", "x": 270, "y": 900, "n": 4}, {"id": "n5", "x": 320, "y": 900, "n": 5}, {"id": "n6", "x": 370, "y": 900, "n": 6}, {"id": "n7", "x": 420, "y": 900, "n": 7}, {"id": "n8", "x": 470, "y": 900, "n": 8}, {"id": "n9", "x": 520, "y": 900, "n": 9}, {"id": "n10", "x": 570, "y": 900, "n": 10}, {"id": "n11", "x": 620, "y": 900, "n": 11}, {"id": "n12", "x": 670, "y": 900, "n": 12}, {"id": "n13", "x": 720, "y": 900, "n": 13}, {"id": "n14", "x": 770, "y": 900, "n": 14}, {"id": "n15", "x": 820, "y": 900, "n": 15}, {"id": "n16", "x": 870, "y": 900, "n": 16}, {"id": "n17", "x": 920, "y": 900, "n": 17}, {"id": "n18", "x": 120, "y": 840, "n": 18}, {"id": "n19", "x": 320, "y": 840, "n": 19}, {"id": "n20", "x": 520, "y": 840, "n": 20}, {"id": "n21", "x": 720, "y": 840, "n": 21}, {"id": "n22", "x": 920, "y": 840, "n": 22}, {"id": "n23", "x": 120, "y": 780, "n": 23}, {"id": "n24", "x": 170, "y": 780, "n": 24}, {"id": "n25", "x": 220, "y": 780, "n": 25}, {"id": "n26", "x": 270, "y": 780, "n": 26}, {"id": "n27", "x": 320, "y": 780, "n": 27}, {"id": "n28", "x": 370, "y": 780, "n": 28}, {"id": "n29", "x": 420, "y": 780, "n": 29}, {"id": "n30", "x": 470, "y": 780, "n": 30}, {"id": "n31", "x": 520, "y": 780, "n": 31}, {"id": "n32", "x": 570, "y": 780, "n": 32}, {"id": "n33", "x": 620, "y": 780, "n": 33}, {"id": "n34", "x": 670, "y": 780, "n": 34}, {"id": "n35", "x": 720, "y": 780, "n": 35}, {"id": "n36", "x": 770, "y": 780, "n": 36}, {"id": "n37", "x": 820, "y": 780, "n": 37}, {"id": "n38", "x": 870, "y": 780, "n": 38}, {"id": "n39", "x": 920, "y": 780, "n": 39}, {"id": "n40", "x": 220, "y": 720, "n": 40}, {"id": "n41", "x": 420, "y": 720, "n": 41}, {"id": "n42", "x": 620, "y": 720, "n": 42}, {"id": "n43", "x": 820, "y": 720, "n": 43}, {"id": "n44", "x": 220, "y": 660, "n": 44}, {"id": "n45", "x": 270, "y": 660, "n": 45}, {"id": "n46", "x": 320, "y": 660, "n": 46}, {"id": "n47", "x": 370, "y": 660, "n": 47}, {"id": "n48", "x": 420, "y": 660, "n": 48}, {"id": "n49", "x": 470, "y": 660, "n": 49}, {"id": "n50", "x": 520, "y": 660, "n": 50}, {"id": "n51", "x": 570, "y": 660, "n": 51}, {"id": "n52", "x": 620, "y": 660, "n": 52}, {"id": "n53", "x": 670, "y": 660, "n": 53}, {"id": "n54", "x": 720, "y": 660, "n": 54}, {"id": "n55", "x": 770, "y": 660, "n": 55}, {"id": "n56", "x": 820, "y": 660, "n": 56}, {"id": "n57", "x": 320, "y": 600, "n": 57}, {"id": "n58", "x": 720, "y": 600, "n": 58}, {"id": "n59", "x": 320, "y": 540, "n": 59}, {"id": "n60", "x": 370, "y": 540, "n": 60}, {"id": "n61", "x": 420, "y": 540, "n": 61}, {"id": "n62", "x": 470, "y": 540, "n": 62}, {"id": "n63", "x": 520, "y": 540, "n": 63}, {"id": "n64", "x": 570, "y": 540, "n": 64}, {"id": "n65", "x": 620, "y": 540, "n": 65}, {"id": "n66", "x": 670, "y": 540, "n": 66}, {"id": "n67", "x": 720, "y": 540, "n": 67}, {"id": "n68", "x": 420, "y": 480, "n": 68}, {"id": "n69", "x": 620, "y": 480, "n": 69}, {"id": "n70", "x": 420, "y": 420, "n": 70}, {"id": "n71", "x": 470, "y": 420, "n": 71}, {"id": "n72", "x": 520, "y": 420, "n": 72}, {"id": "n73", "x": 570, "y": 420, "n": 73}, {"id": "n74", "x": 620, "y": 420, "n": 74}, {"id": "n75", "x": 520, "y": 360, "n": 75}, {"id": "n76", "x": 120, "y": 300, "n": 76}, {"id": "n77", "x": 170, "y": 300, "n": 77}, {"id": "n78", "x": 220, "y": 300, "n": 78}, {"id": "n79", "x": 270, "y": 300, "n": 79}, {"id": "n80", "x": 320, "y": 300, "n": 80}, {"id": "n81", "x": 370, "y": 300, "n": 81}, {"id": "n82", "x": 420, "y": 300, "n": 82}, {"id": "n83", "x": 470, "y": 300, "n": 83}, {"id": "n84", "x": 520, "y": 300, "n": 84}, {"id": "n85", "x": 570, "y": 300, "n": 85}, {"id": "n86", "x": 620, "y": 300, "n": 86}, {"id": "n87", "x": 670, "y": 300, "n": 87}, {"id": "n88", "x": 720, "y": 300, "n": 88}, {"id": "n89", "x": 770, "y": 300, "n": 89}, {"id": "n90", "x": 820, "y": 300, "n": 90}, {"id": "n91", "x": 870, "y": 300, "n": 91}, {"id": "n92", "x": 920, "y": 300, "n": 92}, {"id": "n93", "x": 120, "y": 240, "n": 93}, {"id": "n94", "x": 920, "y": 240, "n": 94}, {"id": "n95", "x": 120, "y": 180, "n": 95}, {"id": "n96", "x": 170, "y": 180, "n": 96}, {"id": "n97", "x": 220, "y": 180, "n": 97}, {"id": "n98", "x": 270, "y": 180, "n": 98}, {"id": "n99", "x": 320, "y": 180, "n": 99}, {"id": "n100", "x": 370, "y": 180, "n": 100}, {"id": "n101", "x": 420, "y": 180, "n": 101}, {"id": "n102", "x": 470, "y": 180, "n": 102}, {"id": "n103", "x": 520, "y": 180, "n": 103}, {"id": "n104", "x": 570, "y": 180, "n": 104}, {"id": "n105", "x": 620, "y": 180, "n": 105}, {"id": "n106", "x": 670, "y": 180, "n": 106}, {"id": "n107", "x": 720, "y": 180, "n": 107}, {"id": "n108", "x": 770, "y": 180, "n": 108}, {"id": "n109", "x": 820, "y": 180, "n": 109}, {"id": "n110", "x": 870, "y": 180, "n": 110}, {"id": "n111", "x": 920, "y": 180, "n": 111}, {"id": "n112", "x": 520, "y": 120, "n": 112}];
+const NODES = [{"id": "n1", "x": 120, "y": 900, "n": 1}, {"id": "n2", "x": 170, "y": 900, "n": 2}, {"id": "n3", "x": 220, "y": 900, "n": 3}, {"id": "n4", "x": 270, "y": 900, "n": 4}, {"id": "n5", "x": 320, "y": 900, "n": 5}, {"id": "n6", "x": 370, "y": 900, "n": 6}, {"id": "n7", "x": 420, "y": 900, "n": 7}, {"id": "n8", "x": 470, "y": 900, "n": 8}, {"id": "n9", "x": 520, "y": 900, "n": 9}, {"id": "n10", "x": 570, "y": 900, "n": 10}, {"id": "n11", "x": 620, "y": 900, "n": 11}, {"id": "n12", "x": 670, "y": 900, "n": 12}, {"id": "n13", "x": 720, "y": 900, "n": 13}, {"id": "n14", "x": 770, "y": 900, "n": 14}, {"id": "n15", "x": 820, "y": 900, "n": 15}, {"id": "n16", "x": 870, "y": 900, "n": 16}, {"id": "n17", "x": 920, "y": 900, "n": 17}, {"id": "n18", "x": 120, "y": 840, "n": 18}, {"id": "n19", "x": 320, "y": 840, "n": 19}, {"id": "n20", "x": 520, "y": 840, "n": 20}, {"id": "n21", "x": 720, "y": 840, "n": 21}, {"id": "n22", "x": 920, "y": 840, "n": 22}, {"id": "n23", "x": 120, "y": 780, "n": 23}, {"id": "n24", "x": 170, "y": 780, "n": 24}, {"id": "n25", "x": 220, "y": 780, "n": 25}, {"id": "n26", "x": 270, "y": 780, "n": 26}, {"id": "n27", "x": 320, "y": 780, "n": 27}, {"id": "n28", "x": 370, "y": 780, "n": 28}, {"id": "n29", "x": 420, "y": 780, "n": 29}, {"id": "n30", "x": 470, "y": 780, "n": 30}, {"id": "n31", "x": 520, "y": 780, "n": 31}, {"id": "n32", "x": 570, "y": 780, "n": 32}, {"id": "n33", "x": 620, "y": 780, "n": 33}, {"id": "n34", "x": 670, "y": 780, "n": 34}, {"id": "n35", "x": 720, "y": 780, "n": 35}, {"id": "n36", "x": 770, "y": 780, "n": 36}, {"id": "n37", "x": 820, "y": 780, "n": 37}, {"id": "n38", "x": 870, "y": 780, "n": 38}, {"id": "n39", "x": 920, "y": 780, "n": 39}, {"id": "n40", "x": 220, "y": 720, "n": 40}, {"id": "n41", "x": 420, "y": 720, "n": 41}, {"id": "n42", "x": 620, "y": 720, "n": 42}, {"id": "n43", "x": 820, "y": 720, "n": 43}, {"id": "n44", "x": 220, "y": 660, "n": 44}, {"id": "n45", "x": 270, "y": 660, "n": 45}, {"id": "n46", "x": 320, "y": 660, "n": 46}, {"id": "n47", "x": 370, "y": 660, "n": 47}, {"id": "n48", "x": 420, "y": 660, "n": 48}, {"id": "n49", "x": 470, "y": 660, "n": 49}, {"id": "n50", "x": 520, "y": 660, "n": 50}, {"id": "n51", "x": 570, "y": 660, "n": 51}, {"id": "n52", "x": 620, "y": 660, "n": 52}, {"id": "n53", "x": 670, "y": 660, "n": 53}, {"id": "n54", "x": 720, "y": 660, "n": 54}, {"id": "n55", "x": 770, "y": 660, "n": 55}, {"id": "n56", "x": 820, "y": 660, "n": 56}, {"id": "n57", "x": 320, "y": 600, "n": 57}, {"id": "n58", "x": 720, "y": 600, "n": 58}, {"id": "n59", "x": 320, "y": 540, "n": 59}, {"id": "n60", "x": 370, "y": 540, "n": 60}, {"id": "n61", "x": 420, "y": 540, "n": 61}, {"id": "n62", "x": 470, "y": 540, "n": 62}, {"id": "n63", "x": 520, "y": 540, "n": 63}, {"id": "n64", "x": 570, "y": 540, "n": 64}, {"id": "n65", "x": 620, "y": 540, "n": 65}, {"id": "n66", "x": 670, "y": 540, "n": 66}, {"id": "n67", "x": 720, "y": 540, "n": 67}, {"id": "n68", "x": 420, "y": 480, "n": 68}, {"id": "n69", "x": 620, "y": 480, "n": 69}, {"id": "n70", "x": 420, "y": 420, "n": 70}, {"id": "n71", "x": 470, "y": 420, "n": 71}, {"id": "n72", "x": 520, "y": 420, "n": 72}, {"id": "n73", "x": 570, "y": 420, "n": 73}, {"id": "n74", "x": 620, "y": 420, "n": 74}, {"id": "n75", "x": 520, "y": 360, "n": 75}, {"id": "n76", "x": 120, "y": 300, "n": 76}, {"id": "n77", "x": 170, "y": 300, "n": 77}, {"id": "n78", "x": 220, "y": 300, "n": 78}, {"id": "n79", "x": 270, "y": 300, "n": 79}, {"id": "n80", "x": 320, "y": 300, "n": 80}, {"id": "n81", "x": 370, "y": 300, "n": 81}, {"id": "n82", "x": 420, "y": 300, "n": 82}, {"id": "n83", "x": 470, "y": 300, "n": 83}, {"id": "n84", "x": 520, "y": 300, "n": 84}, {"id": "n85", "x": 570, "y": 300, "n": 85}, {"id": "n86", "x": 620, "y": 300, "n": 86}, {"id": "n87", "x": 670, "y": 300, "n": 87}, {"id": "n88", "x": 720, "y": 300, "n": 88}, {"id": "n89", "x": 770, "y": 300, "n": 89}, {"id": "n90", "x": 820, "y": 300, "n": 90}, {"id": "n91", "x": 870, "y": 300, "n": 91}, {"id": "n92", "x": 920, "y": 300, "n": 92}, {"id": "n93", "x": 120, "y": 240, "n": 93}, {"id": "n94", "x": 920, "y": 240, "n": 94}, {"id": "n95", "x": 120, "y": 180, "n": 95}, {"id": "n96", "x": 170, "y": 180, "n": 96}, {"id": "n97", "x": 220, "y": 180, "n": 97}, {"id": "n98", "x": 270, "y": 180, "n": 98}, {"id": "n99", "x": 320, "y": 180, "n": 99}, {"id": "n100", "x": 370, "y": 180, "n": 100}, {"id": "n101", "x": 420, "y": 180, "n": 101}, {"id": "n102", "x": 470, "y": 180, "n": 102}, {"id": "n103", "x": 520, "y": 180, "n": 103}, {"id": "n104", "x": 570, "y": 180, "n": 104}, {"id": "n105", "x": 620, "y": 180, "n": 105}, {"id": "n106", "x": 670, "y": 180, "n": 106}, {"id": "n107", "x": 720, "y": 180, "n": 107}, {"id": "n108", "x": 770, "y": 180, "n": 108}, {"id": "n109", "x": 820, "y": 180, "n": 109}, {"id": "n110", "x": 870, "y": 180, "n": 110}, {"id": "n111", "x": 920, "y": 180, "n111}, {"id": "n112", "x": 520, "y": 120, "n": 112}];
 const ADJ = {"n112": ["n103"], "n95": ["n96", "n93"], "n96": ["n97", "n95"], "n97": ["n98", "n96"], "n98": ["n99", "n97"], "n99": ["n100", "n98"], "n100": ["n101", "n99"], "n101": ["n102", "n100"], "n102": ["n103", "n101"], "n103": ["n104", "n102", "n112"], "n104": ["n105", "n103"], "n105": ["n106", "n104"], "n106": ["n107", "n105"], "n107": ["n108", "n106"], "n108": ["n109", "n107"], "n109": ["n110", "n108"], "n110": ["n111", "n109"], "n111": ["n110", "n94"], "n93": ["n76", "n95"], "n94": ["n92", "n111"], "n76": ["n77", "n93"], "n77": ["n78", "n76"], "n78": ["n79", "n77"], "n79": ["n80", "n78"], "n80": ["n81", "n79"], "n81": ["n82", "n80"], "n82": ["n83", "n81"], "n83": ["n84", "n82"], "n84": ["n85", "n83", "n75"], "n85": ["n86", "n84"], "n86": ["n87", "n85"], "n87": ["n88", "n86"], "n88": ["n89", "n87"], "n89": ["n90", "n88"], "n90": ["n91", "n89"], "n91": ["n92", "n90"], "n92": ["n91", "n94"], "n75": ["n72", "n84"], "n70": ["n71", "n68"], "n71": ["n72", "n70"], "n72": ["n73", "n71", "n75"], "n73": ["n74", "n72"], "n74": ["n73", "n69"], "n68": ["n61", "n70"], "n69": ["n65", "n74"], "n59": ["n60", "n57"], "n60": ["n61", "n59"], "n61": ["n62", "n60", "n68"], "n62": ["n63", "n61"], "n63": ["n64", "n62"], "n64": ["n65", "n63"], "n65": ["n66", "n64", "n69"], "n66": ["n67", "n65"], "n67": ["n66", "n58"], "n57": ["n46", "n59"], "n58": ["n54", "n67"], "n44": ["n45", "n40"], "n45": ["n46", "n44"], "n46": ["n47", "n45", "n57"], "n47": ["n48", "n46"], "n48": ["n49", "n47", "n41"], "n49": ["n50", "n48"], "n50": ["n51", "n49"], "n51": ["n52", "n50"], "n52": ["n53", "n51", "n42"], "n53": ["n54", "n52"], "n54": ["n55", "n53", "n58"], "n55": ["n56", "n54"], "n56": ["n55", "n43"], "n40": ["n25", "n44"], "n41": ["n29", "n48"], "n42": ["n33", "n52"], "n43": ["n37", "n56"], "n23": ["n24", "n18"], "n24": ["n25", "n23"], "n25": ["n26", "n24", "n40"], "n26": ["n27", "n25"], "n27": ["n28", "n26", "n19"], "n28": ["n29", "n27"], "n29": ["n30", "n28", "n41"], "n30": ["n31", "n29"], "n31": ["n32", "n30", "n20"], "n32": ["n33", "n31"], "n33": ["n34", "n32", "n42"], "n34": ["n35", "n33"], "n35": ["n36", "n34", "n21"], "n36": ["n37", "n35"], "n37": ["n38", "n36", "n43"], "n38": ["n39", "n37"], "n39": ["n38", "n22"], "n18": ["n1", "n23"], "n19": ["n5", "n27"], "n20": ["n9", "n31"], "n21": ["n13", "n35"], "n22": ["n17", "n39"], "n1": ["n2", "n18"], "n2": ["n3", "n1"], "n3": ["n4", "n2"], "n4": ["n5", "n3"], "n5": ["n6", "n4", "n19"], "n6": ["n7", "n5"], "n7": ["n8", "n6"], "n8": ["n9", "n7"], "n9": ["n10", "n8", "n20"], "n10": ["n11", "n9"], "n11": ["n12", "n10"], "n12": ["n13", "n11"], "n13": ["n14", "n12", "n21"], "n14": ["n15", "n13"], "n15": ["n16", "n14"], "n16": ["n17", "n15"], "n17": ["n16", "n22"]};
-const HOMES = {"red": [{"x": 120, "y": 1050}, {"x": 170, "y": 1050}, {"x": 220, "y": 1050}, {"x": 270, "y": 1050}, {"x": 320, "y": 1050}], "green": [{"x": 320, "y": 1050}, {"x": 370, "y": 1050}, {"x": 420, "y": 1050}, {"x": 470, "y": 1050}, {"x": 520, "y": 1050}], "yellow": [{"x": 520, "y": 1050}, {"x": 570, "y": 1050}, {"x": 620, "y": 1050}, {"x": 670, "y": 1050}, {"x": 720, "y": 1050}], "blue": [{"x": 720, "y": 1050}, {"x": 770, "y": 1050}, {"x": 820, "y": 1050}, {"x": 870, "y": 1050}, {"x": 920, "y": 1050}]};
 const ENTRY = {"red": "n3", "green": "n7", "yellow": "n11", "blue": "n15"};
 const BARRS = ["n23", "n27", "n31", "n35", "n39", "n61", "n65", "n72", "n75", "n84", "n103"];
 
 const NODE_BY_ID = Object.fromEntries(NODES.map(n=>[n.id,n]));
 const ADJ_SAFE = new Proxy(ADJ, { get: (t, k)=> t[k] || [] });
 
-// AJOUT : Fonction de sécurité pour éviter le blocage
 function getNodeById(id){ return NODE_BY_ID[id] || null; }
 
 const menu=document.getElementById('menu'), game=document.getElementById('game');
