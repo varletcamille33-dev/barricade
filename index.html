@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Malefiz — Ice Pop Edition</title>
+  <title>Malefiz — Vitamin Edition</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,41 +10,36 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
-    /* --- VARIABLES & THEME --- */
+    /* --- THEME VITAMIN POP --- */
     :root {
-      /* FOND : Gris-Bleu très clair (frais et lisible) */
-      --bg-main: #eef2f5; 
-      --bg-panel: #ffffff;
+      /* COULEURS VIVES MAIS DOUCES */
+      --bg-gradient-1: #f6d365; /* Jaune doux */
+      --bg-gradient-2: #fda085; /* Pêche */
       
-      /* TEXTE : Bleu nuit profond (plus doux que le noir) */
-      --text-main: #2c3e50;
-      --text-light: #7f8c8d;
+      /* LE PLATEAU (Bleu Lagon pour contraster avec les pions/cases) */
+      --board-bg: #00b894; 
+      --board-border: #00a884;
       
-      /* COULEURS D'ACTION (Vibrantes) */
-      --primary: #ff6b6b; /* Corail Fluo */
-      --primary-dark: #ee5253;
-      --secondary: #54a0ff; /* Bleu électrique */
-      --accent: #5f27cd; /* Violet profonds pour les titres */
+      /* PANNEAUX (Blanc teinté pour ne pas être éblouissant) */
+      --panel-bg: #fffef0; 
+      --text-main: #2d3436;
+      --text-light: #636e72;
       
-      /* OMBRES */
-      --shadow-card: 0 8px 20px rgba(44, 62, 80, 0.08);
-      --shadow-float: 0 10px 25px rgba(84, 160, 255, 0.25);
+      /* ACTIONS */
+      --btn-primary: #e84393; /* Rose Bonbon */
+      --btn-primary-shadow: #d63080;
+      --btn-secondary: #6c5ce7; /* Violet cool */
+      --btn-secondary-shadow: #5849c4;
       
-      /* JOUEURS */
-      --p-red: #ff4757;
-      --p-blue: #2e86de;
-      --p-green: #2ed573;
-      --p-yellow: #ffa502;
+      --shadow-card: 0 10px 20px rgba(0,0,0,0.15);
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     
     body {
       margin: 0;
-      background-color: var(--bg-main);
-      /* Motif subtil de points pour habiller le fond sans surcharger */
-      background-image: radial-gradient(#cbd5e0 2px, transparent 2px);
-      background-size: 30px 30px;
+      /* Fond coloré Pêche/Mangue */
+      background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
       color: var(--text-main);
       font-family: 'Fredoka', sans-serif;
       height: 100vh;
@@ -54,83 +49,84 @@
       overflow: hidden;
     }
 
-    h3 { margin: 0 0 16px 0; font-weight: 700; color: var(--accent); font-size: 1.5rem; text-align: center; letter-spacing: -0.5px; }
+    h3 { margin: 0 0 16px 0; font-weight: 700; color: var(--btn-secondary); font-size: 1.6rem; text-align: center; text-shadow: 0 2px 0 rgba(255,255,255,0.5); }
 
-    /* --- CARDS (Panneaux blancs) --- */
+    /* --- CARTES --- */
     .card {
-      background: var(--bg-panel);
+      background: var(--panel-bg);
       border-radius: 24px;
       padding: 24px;
       box-shadow: var(--shadow-card);
-      border: 1px solid #dfe6e9;
+      border: 4px solid #fff;
       margin: 16px;
       width: 90%;
       max-width: 600px;
+      position: relative;
     }
 
     .row { display: flex; gap: 12px; flex-wrap: wrap; }
     .col { display: flex; flex-direction: column; gap: 8px; }
 
     /* --- INPUTS --- */
-    label { font-size: 14px; font-weight: 600; color: var(--text-light); margin-left: 4px; }
+    label { font-size: 13px; font-weight: 700; color: var(--text-light); margin-left: 4px; text-transform: uppercase; }
     
     input, select {
       font-family: inherit;
       font-size: 16px;
-      border-radius: 14px;
-      border: 2px solid #dfe4ea;
-      background: #f8f9fa;
-      padding: 12px 16px;
+      font-weight: 600;
+      border-radius: 16px;
+      border: 3px solid #dfe6e9;
+      background: #fff;
+      padding: 10px 16px;
       color: var(--text-main);
       width: 100%;
       outline: none;
-      transition: 0.2s;
+      transition: all 0.2s;
     }
     input:focus, select:focus {
-      border-color: var(--secondary);
-      background: #fff;
-      box-shadow: 0 0 0 4px rgba(84, 160, 255, 0.15);
+      border-color: var(--btn-secondary);
+      box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.2);
     }
 
-    /* --- BOUTONS "3D" --- */
+    /* --- BOUTONS FUN --- */
     button {
       border: none;
       font-family: inherit;
       font-weight: 700;
       font-size: 15px;
-      padding: 14px 24px;
-      border-radius: 18px;
+      padding: 12px 24px;
+      border-radius: 50px; /* Boutons très ronds */
       cursor: pointer;
-      transition: all 0.1s ease;
+      transition: transform 0.1s;
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       position: relative;
       top: 0;
+      color: white;
     }
     
-    /* Bouton Secondaire (Gris clair) */
-    button {
-      background: #dfe4ea;
-      color: #747d8c;
-      box-shadow: 0 5px 0 #ced6e0;
-    }
-    button:active:not(:disabled) { top: 5px; box-shadow: 0 0 0 #ced6e0; }
-
-    /* Bouton Primaire (Corail/Orange) */
+    /* Bouton Principal (Créer, Lancer) - Rose */
     button.primary {
-      background: var(--primary);
-      color: white;
-      box-shadow: 0 5px 0 var(--primary-dark);
+      background: var(--btn-primary);
+      box-shadow: 0 5px 0 var(--btn-primary-shadow);
     }
-    button.primary:active:not(:disabled) { top: 5px; box-shadow: 0 0 0 var(--primary-dark); }
+    button.primary:active:not(:disabled) { top: 5px; box-shadow: 0 0 0 var(--btn-primary-shadow); }
+
+    /* Bouton Secondaire (Rejoindre) - Violet */
+    button {
+      background: var(--btn-secondary);
+      box-shadow: 0 5px 0 var(--btn-secondary-shadow);
+    }
+    button:active:not(:disabled) { top: 5px; box-shadow: 0 0 0 var(--btn-secondary-shadow); }
 
     button:disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
-      filter: grayscale(1);
-      top: 5px;
       box-shadow: none;
+      top: 5px;
+      background: #b2bec3;
+      filter: grayscale(0.5);
     }
 
     /* --- JEU --- */
@@ -147,10 +143,10 @@
       border: none;
     }
 
-    /* HUD (Barre du haut) */
+    /* HUD */
     .hud-bar {
-      background: #ffffff;
-      padding: 8px 16px;
+      background: var(--panel-bg);
+      padding: 10px 16px;
       border-radius: 20px;
       box-shadow: var(--shadow-card);
       display: flex;
@@ -158,25 +154,23 @@
       align-items: center;
       gap: 10px;
       margin-bottom: 10px;
+      flex-wrap: wrap;
       z-index: 10;
-      border: 1px solid #dfe6e9;
+      border: 3px solid #fff;
     }
 
-    .dice-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      line-height: 1;
-      background: #f1f2f6;
-      padding: 6px 12px;
-      border-radius: 12px;
-      min-width: 60px;
+    .dice-container {
+      background: #ffeaa7;
+      color: #d35400;
+      padding: 6px 14px;
+      border-radius: 14px;
+      font-weight: 800;
+      border: 2px solid #fdcb6e;
     }
-    .dice-val { font-size: 22px; font-weight: 800; color: var(--text-main); }
-    .dice-label { font-size: 10px; color: var(--text-light); text-transform: uppercase; font-weight: 700; }
-
-    .turn-info { font-size: 14px; color: var(--text-light); }
-    .turn-info strong { color: var(--secondary); font-size: 1.1em; }
+    .dice-val { font-size: 1.3em; }
+    
+    .turn-indicator { font-size: 14px; color: var(--text-light); font-weight: 600; }
+    .turn-indicator strong { color: var(--btn-secondary); font-size: 1.1em; }
 
     #phase.notice {
       background: var(--text-main);
@@ -184,17 +178,18 @@
       padding: 6px 12px;
       border-radius: 20px;
       font-size: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      font-weight: 600;
     }
 
-    /* --- PLATEAU SVG --- */
+    /* --- LE PLATEAU (Ici on change la couleur) --- */
     #wrap {
       flex: 1;
       overflow: hidden;
       border-radius: 24px;
-      background: #fff; /* Fond du plateau BLANC pour contraste maximal */
-      border: 4px solid #dfe4ea; /* Bordure douce */
-      box-shadow: inset 0 0 30px rgba(0,0,0,0.03);
+      /* Fond BLEU LAGON pour faire ressortir les pions */
+      background: var(--board-bg);
+      border: 6px solid rgba(255,255,255,0.4);
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
       position: relative;
       touch-action: none;
     }
@@ -202,116 +197,110 @@
     #svg { display: block; width: 100%; height: 100%; cursor: grab; }
     #svg:active { cursor: grabbing; }
 
-    /* --- ELEMENTS DU JEU (C'est ici qu'on change les couleurs) --- */
-    
-    /* Les chemins (Lignes) */
+    /* --- ELEMENTS GRAPHIQUES --- */
     .edge { 
-      stroke: #dce2e8; /* Gris clair bleuté */
-      stroke-width: 8; /* Plus épais pour mieux voir */
+      stroke: rgba(255,255,255,0.3); /* Chemins en blanc transparent */
+      stroke-width: 8; 
       stroke-linecap: round; 
     }
     
-    /* Les cases (Noeuds) */
+    /* Cases : BLANCHES pour le contraste */
     .node { 
-      fill: #ffffff; /* Blanc pur */
-      stroke: #bdc3c7; /* Contour gris moyen */
-      stroke-width: 3; 
-      /* Astuce visuelle: pas d'ombre portée en SVG CSS direct facile, 
-         mais le stroke épais donne l'effet "case vide" */
+      fill: #ffffff; 
+      stroke: #00b894; /* Bordure de la couleur du fond pour effet "cutout" */
+      stroke-width: 0; /* ou fine bordure */
+      /* On va tricher : stroke noir très léger ou pas de stroke */
     }
+    /* Pour mieux voir, on met une petite ombre portée sur les nodes via CSS ? Non, SVG. 
+       On va mettre un stroke un peu plus foncé que le fond */
+    .node { stroke: rgba(0,0,0,0.1); stroke-width: 2; }
 
-    /* Barricades : Noir mat avec reflets */
+    /* Barricades : Noires brillantes */
     .barricade { 
-      fill: #2f3542; 
-      stroke: #57606f; 
+      fill: #2d3436; 
+      stroke: #636e72; 
       stroke-width: 2; 
     }
     
-    /* Pions : Couleurs vibrantes avec contour blanc pour détacher */
+    /* Pions : Couleurs Peps avec contour blanc */
     .pawn { 
       stroke: #fff; 
       stroke-width: 3; 
-      paint-order: stroke; /* Le contour ne mange pas le pion */
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); /* Effet rebond */
+      paint-order: stroke; 
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .pawn-text { fill: #fff; font-weight: 800; pointer-events: none; font-size: 14px; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+    .pawn-text { fill: #fff; font-weight: 800; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.4); font-size: 12px; }
 
-    /* Aide visuelle interaction */
+    /* Aides visuelles */
     .hint-origin {
-      fill: rgba(84, 160, 255, 0.1);
-      stroke: var(--secondary);
+      fill: rgba(255, 255, 255, 0.3);
+      stroke: #fff;
       stroke-width: 3;
       stroke-dasharray: 6,6;
-      animation: spin 8s linear infinite;
+      animation: rotateRing 8s linear infinite;
       cursor: pointer;
     }
     .hint-target {
-      fill: rgba(46, 213, 115, 0.2); /* Vert eau transparent */
-      stroke: #2ed573;
+      fill: rgba(255, 234, 167, 0.4); /* Jaune transparent */
+      stroke: #ffeaa7;
       stroke-width: 4;
       cursor: pointer;
-      animation: pulse 1.5s infinite;
+      animation: pulse 1.2s infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); transform-origin: center; } }
+    .select-ring { fill: none; stroke: #fff; stroke-width: 4; }
+
+    @keyframes rotateRing { to { transform: rotate(360deg); transform-origin: center; } }
     @keyframes pulse { 0% {r: 24px; opacity: 0.6;} 50% {r: 28px; opacity: 1;} 100% {r: 24px; opacity: 0.6;} }
 
-    /* --- LISTE JOUEURS & LOGS --- */
+    /* --- LOGS --- */
     #bottom-panel {
       display: flex;
       gap: 12px;
-      height: 150px;
+      height: 140px;
       margin-top: 10px;
     }
     .player-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       overflow-y: auto;
-      min-width: 130px;
+      min-width: 120px;
     }
     .tag {
       padding: 8px 12px;
       border-radius: 12px;
-      background: #fff;
-      border: 1px solid #dfe6e9;
+      background: rgba(255,255,255,0.9);
+      border: none;
       font-size: 13px;
       font-weight: 700;
       display: flex;
       align-items: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+      color: var(--text-main);
     }
-    .dot { width: 14px; height: 14px; border-radius: 50%; margin-right: 10px; border: 2px solid rgba(0,0,0,0.1); }
+    .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 2px solid rgba(0,0,0,0.1); }
     
     #log {
       flex: 1;
-      background: #fff;
-      border: 1px solid #dfe6e9;
+      background: rgba(255,255,255,0.8);
+      border: none;
       border-radius: 16px;
       padding: 12px;
       font-size: 13px;
-      line-height: 1.6;
-      color: var(--text-light);
-      overflow-y: auto;
-      box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);
+      line-height: 1.5;
+      color: var(--text-main);
     }
-    #log div { margin-bottom: 4px; border-bottom: 1px solid #f1f2f6; padding-bottom: 4px; }
 
-    /* MODAL VICTOIRE */
-    #winOverlay {
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(8px);
-    }
-    #winBox {
-      border: none;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-    }
+    /* Victoire */
+    #winOverlay { backdrop-filter: blur(8px); background: rgba(0,0,0,0.2); }
+    #winBox { box-shadow: 0 20px 60px rgba(0,0,0,0.2); border: none; background: #fff; }
+    #winTitle { color: var(--btn-primary); font-size: 2.5rem; }
 
   </style>
 </head>
 <body>
 
 <section id="menu" class="card">
-  <h3>✨ Malefiz • Lobby</h3>
+  <h3>🎲 Malefiz • Vitamin</h3>
   
   <div class="col">
     <label>Ton Pseudo</label>
@@ -327,53 +316,46 @@
   </div>
 
   <div class="col" style="margin-top:12px">
-    <label>Code Partie</label>
+    <label>Code de la partie</label>
     <div class="row" style="align-items:center">
-      <input id="m_game" placeholder="ex: FunGame123">
+      <input id="m_game" placeholder="ex: FunRoom">
     </div>
   </div>
 
-  <div style="height: 24px;"></div>
+  <div style="border-top: 2px dashed #dfe6e9; margin: 24px 0;"></div>
 
-  <div class="row" style="justify-content: center; gap:16px;">
-    <button id="m_create" class="primary" style="flex:1">Créer</button>
-    <button id="m_join" style="flex:1">Rejoindre</button>
+  <div class="row" style="justify-content: center; gap:16px">
+    <button id="m_create" class="primary">✨ Créer</button>
+    <button id="m_join">Rejoindre 🚀</button>
   </div>
 
-  <div id="lobby" style="display:none; margin-top:24px; background:#f1f2f6; padding:16px; border-radius:16px;">
-    <div style="margin-bottom:12px; color:var(--text-light); font-size:0.85em; text-transform:uppercase; font-weight:700; letter-spacing:1px;">Salle d'attente</div>
+  <div id="lobby" style="display:none; margin-top:24px; background:#fff; padding:15px; border-radius:16px; border:2px solid #eee;">
+    <div style="margin-bottom:8px; color:var(--text-light); font-size:0.8em; text-transform:uppercase; font-weight:800;">Joueurs prêts :</div>
     <div id="lobbyList" class="row" style="gap:8px"></div>
     
-    <div class="row" style="margin-top:20px; justify-content:center;">
-      <button id="m_start" class="primary" style="width:100%">Lancer la partie ! 🚀</button>
+    <div class="row" style="margin-top:20px; justify-content:center; align-items:center; flex-direction:column; gap:10px">
+      <button id="m_start" class="primary" style="width:100%">C'est parti !</button>
+      <span class="notice" style="font-size:11px; color:var(--text-light)">Hôte uniquement • Min 2 joueurs</span>
     </div>
-    <div style="text-align:center; margin-top:8px;"><span class="notice" style="font-size:11px; opacity:0.6; color:#000; background:transparent; padding:0;">Hôte uniquement • Min 2 joueurs</span></div>
   </div>
 </section>
 
 <section id="game" style="display:none">
   
   <div class="hud-bar">
-    <div class="row" style="align-items:center; gap:12px">
-      <button id="roll" class="primary" style="padding: 10px 16px; font-size:14px;">🎲 Lancer</button>
-      
-      <div class="dice-box">
-        <span class="dice-label">Résultat</span>
-        <span id="diceVal" class="dice-val">-</span>
+    <div class="row" style="align-items:center; gap:15px">
+      <button id="roll" class="primary">🎲 Lancer</button>
+      <div class="dice-container">
+        <span style="font-size:0.7em; text-transform:uppercase; opacity:0.7; display:block;">Dé</span>
+        <span id="diceVal" class="dice-val">—</span>
       </div>
-      
-      <div class="turn-info">Tour : <strong id="turn">—</strong></div>
+      <div class="turn-indicator">Tour : <strong id="turn">—</strong></div>
     </div>
     <div id="phase" class="notice"></div>
   </div>
 
   <div id="wrap">
     <svg id="svg" viewBox="0 0 1090 1300" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.2"/>
-        </filter>
-      </defs>
       <g id="edges"></g>
       <g id="nodes"></g>
       <g id="homes"></g>
@@ -384,19 +366,17 @@
 
   <div id="bottom-panel">
     <div id="players" class="player-list"></div>
-    <div id="log">Bienvenue !<br>En attente du début de partie...</div>
+    <div id="log">Bienvenue !<br>En attente du lancer...</div>
   </div>
 
 </section>
 
-<div id="winOverlay" role="dialog" aria-modal="true" style="display:none; position:fixed; inset:0; align-items:center; justify-content:center; z-index:9999;">
-  <div id="winBox" class="card" style="text-align:center; max-width:360px; margin:0; padding:30px;">
-    <div style="font-size:60px; margin-bottom:10px;">🏆</div>
-    <h2 id="winTitle" style="color:var(--primary); font-size:24px; margin:0 0 10px 0;">Victoire !</h2>
-    <p id="winMsg" style="line-height:1.5; color:var(--text-light); margin-bottom:24px; font-size:14px;">
-      Incroyable performance. Ou beaucoup de chance. On ne saura jamais.
-    </p>
-    <button id="winClose" class="primary" style="width:100%">Retour Menu</button>
+<div id="winOverlay" role="dialog" aria-modal="true" style="display:none">
+  <div id="winBox" class="card" style="text-align:center; max-width:400px; margin:0;">
+    <div style="font-size:60px; margin-bottom:10px;">🎉</div>
+    <h2 id="winTitle">Victoire !</h2>
+    <p id="winMsg" style="line-height:1.6; color:#666; margin-bottom:24px;">Quelle maîtrise impressionnante.</p>
+    <button id="winClose" class="primary">Retour Menu</button>
   </div>
 </div>
 
@@ -418,8 +398,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// COULEURS VIBRANTES POUR LE JS
-const COLORS={red:"#ff4757",blue:"#2e86de",green:"#2ed573",yellow:"#ffa502"};
+// COULEURS VIBRANTES
+const COLORS={red:"#ff7675",blue:"#74b9ff",green:"#55efc4",yellow:"#ffeaa7"};
+
 const NODES = [{"id": "n1", "x": 120, "y": 900, "n": 1}, {"id": "n2", "x": 170, "y": 900, "n": 2}, {"id": "n3", "x": 220, "y": 900, "n": 3}, {"id": "n4", "x": 270, "y": 900, "n": 4}, {"id": "n5", "x": 320, "y": 900, "n": 5}, {"id": "n6", "x": 370, "y": 900, "n": 6}, {"id": "n7", "x": 420, "y": 900, "n": 7}, {"id": "n8", "x": 470, "y": 900, "n": 8}, {"id": "n9", "x": 520, "y": 900, "n": 9}, {"id": "n10", "x": 570, "y": 900, "n": 10}, {"id": "n11", "x": 620, "y": 900, "n": 11}, {"id": "n12", "x": 670, "y": 900, "n": 12}, {"id": "n13", "x": 720, "y": 900, "n": 13}, {"id": "n14", "x": 770, "y": 900, "n": 14}, {"id": "n15", "x": 820, "y": 900, "n": 15}, {"id": "n16", "x": 870, "y": 900, "n": 16}, {"id": "n17", "x": 920, "y": 900, "n": 17}, {"id": "n18", "x": 120, "y": 840, "n": 18}, {"id": "n19", "x": 320, "y": 840, "n": 19}, {"id": "n20", "x": 520, "y": 840, "n": 20}, {"id": "n21", "x": 720, "y": 840, "n": 21}, {"id": "n22", "x": 920, "y": 840, "n": 22}, {"id": "n23", "x": 120, "y": 780, "n": 23}, {"id": "n24", "x": 170, "y": 780, "n": 24}, {"id": "n25", "x": 220, "y": 780, "n": 25}, {"id": "n26", "x": 270, "y": 780, "n": 26}, {"id": "n27", "x": 320, "y": 780, "n": 27}, {"id": "n28", "x": 370, "y": 780, "n": 28}, {"id": "n29", "x": 420, "y": 780, "n": 29}, {"id": "n30", "x": 470, "y": 780, "n": 30}, {"id": "n31", "x": 520, "y": 780, "n": 31}, {"id": "n32", "x": 570, "y": 780, "n": 32}, {"id": "n33", "x": 620, "y": 780, "n": 33}, {"id": "n34", "x": 670, "y": 780, "n": 34}, {"id": "n35", "x": 720, "y": 780, "n": 35}, {"id": "n36", "x": 770, "y": 780, "n": 36}, {"id": "n37", "x": 820, "y": 780, "n": 37}, {"id": "n38", "x": 870, "y": 780, "n": 38}, {"id": "n39", "x": 920, "y": 780, "n": 39}, {"id": "n40", "x": 220, "y": 720, "n": 40}, {"id": "n41", "x": 420, "y": 720, "n": 41}, {"id": "n42", "x": 620, "y": 720, "n": 42}, {"id": "n43", "x": 820, "y": 720, "n": 43}, {"id": "n44", "x": 220, "y": 660, "n": 44}, {"id": "n45", "x": 270, "y": 660, "n": 45}, {"id": "n46", "x": 320, "y": 660, "n": 46}, {"id": "n47", "x": 370, "y": 660, "n": 47}, {"id": "n48", "x": 420, "y": 660, "n": 48}, {"id": "n49", "x": 470, "y": 660, "n": 49}, {"id": "n50", "x": 520, "y": 660, "n": 50}, {"id": "n51", "x": 570, "y": 660, "n": 51}, {"id": "n52", "x": 620, "y": 660, "n": 52}, {"id": "n53", "x": 670, "y": 660, "n": 53}, {"id": "n54", "x": 720, "y": 660, "n": 54}, {"id": "n55", "x": 770, "y": 660, "n": 55}, {"id": "n56", "x": 820, "y": 660, "n": 56}, {"id": "n57", "x": 320, "y": 600, "n": 57}, {"id": "n58", "x": 720, "y": 600, "n": 58}, {"id": "n59", "x": 320, "y": 540, "n": 59}, {"id": "n60", "x": 370, "y": 540, "n": 60}, {"id": "n61", "x": 420, "y": 540, "n": 61}, {"id": "n62", "x": 470, "y": 540, "n": 62}, {"id": "n63", "x": 520, "y": 540, "n": 63}, {"id": "n64", "x": 570, "y": 540, "n": 64}, {"id": "n65", "x": 620, "y": 540, "n": 65}, {"id": "n66", "x": 670, "y": 540, "n": 66}, {"id": "n67", "x": 720, "y": 540, "n": 67}, {"id": "n68", "x": 420, "y": 480, "n": 68}, {"id": "n69", "x": 620, "y": 480, "n": 69}, {"id": "n70", "x": 420, "y": 420, "n": 70}, {"id": "n71", "x": 470, "y": 420, "n": 71}, {"id": "n72", "x": 520, "y": 420, "n": 72}, {"id": "n73", "x": 570, "y": 420, "n": 73}, {"id": "n74", "x": 620, "y": 420, "n": 74}, {"id": "n75", "x": 520, "y": 360, "n": 75}, {"id": "n76", "x": 120, "y": 300, "n": 76}, {"id": "n77", "x": 170, "y": 300, "n": 77}, {"id": "n78", "x": 220, "y": 300, "n": 78}, {"id": "n79", "x": 270, "y": 300, "n": 79}, {"id": "n80", "x": 320, "y": 300, "n": 80}, {"id": "n81", "x": 370, "y": 300, "n": 81}, {"id": "n82", "x": 420, "y": 300, "n": 82}, {"id": "n83", "x": 470, "y": 300, "n": 83}, {"id": "n84", "x": 520, "y": 300, "n": 84}, {"id": "n85", "x": 570, "y": 300, "n": 85}, {"id": "n86", "x": 620, "y": 300, "n": 86}, {"id": "n87", "x": 670, "y": 300, "n": 87}, {"id": "n88", "x": 720, "y": 300, "n": 88}, {"id": "n89", "x": 770, "y": 300, "n": 89}, {"id": "n90", "x": 820, "y": 300, "n": 90}, {"id": "n91", "x": 870, "y": 300, "n": 91}, {"id": "n92", "x": 920, "y": 300, "n": 92}, {"id": "n93", "x": 120, "y": 240, "n": 93}, {"id": "n94", "x": 920, "y": 240, "n": 94}, {"id": "n95", "x": 120, "y": 180, "n": 95}, {"id": "n96", "x": 170, "y": 180, "n": 96}, {"id": "n97", "x": 220, "y": 180, "n": 97}, {"id": "n98", "x": 270, "y": 180, "n": 98}, {"id": "n99", "x": 320, "y": 180, "n": 99}, {"id": "n100", "x": 370, "y": 180, "n": 100}, {"id": "n101", "x": 420, "y": 180, "n": 101}, {"id": "n102", "x": 470, "y": 180, "n": 102}, {"id": "n103", "x": 520, "y": 180, "n": 103}, {"id": "n104", "x": 570, "y": 180, "n": 104}, {"id": "n105", "x": 620, "y": 180, "n": 105}, {"id": "n106", "x": 670, "y": 180, "n": 106}, {"id": "n107", "x": 720, "y": 180, "n": 107}, {"id": "n108", "x": 770, "y": 180, "n": 108}, {"id": "n109", "x": 820, "y": 180, "n": 109}, {"id": "n110", "x": 870, "y": 180, "n": 110}, {"id": "n111", "x": 920, "y": 180, "n": 111}, {"id": "n112", "x": 520, "y": 120, "n": 112}];
 const ADJ = {"n112": ["n103"], "n95": ["n96", "n93"], "n96": ["n97", "n95"], "n97": ["n98", "n96"], "n98": ["n99", "n97"], "n99": ["n100", "n98"], "n100": ["n101", "n99"], "n101": ["n102", "n100"], "n102": ["n103", "n101"], "n103": ["n104", "n102", "n112"], "n104": ["n105", "n103"], "n105": ["n106", "n104"], "n106": ["n107", "n105"], "n107": ["n108", "n106"], "n108": ["n109", "n107"], "n109": ["n110", "n108"], "n110": ["n111", "n109"], "n111": ["n110", "n94"], "n93": ["n76", "n95"], "n94": ["n92", "n111"], "n76": ["n77", "n93"], "n77": ["n78", "n76"], "n78": ["n79", "n77"], "n79": ["n80", "n78"], "n80": ["n81", "n79"], "n81": ["n82", "n80"], "n82": ["n83", "n81"], "n83": ["n84", "n82"], "n84": ["n85", "n83", "n75"], "n85": ["n86", "n84"], "n86": ["n87", "n85"], "n87": ["n88", "n86"], "n88": ["n89", "n87"], "n89": ["n90", "n88"], "n90": ["n91", "n89"], "n91": ["n92", "n90"], "n92": ["n91", "n94"], "n75": ["n72", "n84"], "n70": ["n71", "n68"], "n71": ["n72", "n70"], "n72": ["n73", "n71", "n75"], "n73": ["n74", "n72"], "n74": ["n73", "n69"], "n68": ["n61", "n70"], "n69": ["n65", "n74"], "n59": ["n60", "n57"], "n60": ["n61", "n59"], "n61": ["n62", "n60", "n68"], "n62": ["n63", "n61"], "n63": ["n64", "n62"], "n64": ["n65", "n63"], "n65": ["n66", "n64", "n69"], "n66": ["n67", "n65"], "n67": ["n66", "n58"], "n57": ["n46", "n59"], "n58": ["n54", "n67"], "n44": ["n45", "n40"], "n45": ["n46", "n44"], "n46": ["n47", "n45", "n57"], "n47": ["n48", "n46"], "n48": ["n49", "n47", "n41"], "n49": ["n50", "n48"], "n50": ["n51", "n49"], "n51": ["n52", "n50"], "n52": ["n53", "n51", "n42"], "n53": ["n54", "n52"], "n54": ["n55", "n53", "n58"], "n55": ["n56", "n54"], "n56": ["n55", "n43"], "n40": ["n25", "n44"], "n41": ["n29", "n48"], "n42": ["n33", "n52"], "n43": ["n37", "n56"], "n23": ["n24", "n18"], "n24": ["n25", "n23"], "n25": ["n26", "n24", "n40"], "n26": ["n27", "n25"], "n27": ["n28", "n26", "n19"], "n28": ["n29", "n27"], "n29": ["n30", "n28", "n41"], "n30": ["n31", "n29"], "n31": ["n32", "n30", "n20"], "n32": ["n33", "n31"], "n33": ["n34", "n32", "n42"], "n34": ["n35", "n33"], "n35": ["n36", "n34", "n21"], "n36": ["n37", "n35"], "n37": ["n38", "n36", "n43"], "n38": ["n39", "n37"], "n39": ["n38", "n22"], "n18": ["n1", "n23"], "n19": ["n5", "n27"], "n20": ["n9", "n31"], "n21": ["n13", "n35"], "n22": ["n17", "n39"], "n1": ["n2", "n18"], "n2": ["n3", "n1"], "n3": ["n4", "n2"], "n4": ["n5", "n3"], "n5": ["n6", "n4", "n19"], "n6": ["n7", "n5"], "n7": ["n8", "n6"], "n8": ["n9", "n7"], "n9": ["n10", "n8", "n20"], "n10": ["n11", "n9"], "n11": ["n12", "n10"], "n12": ["n13", "n11"], "n13": ["n14", "n12", "n21"], "n14": ["n15", "n13"], "n15": ["n16", "n14"], "n16": ["n17", "n15"], "n17": ["n16", "n22"]};
 const HOMES = {"red": [{"x": 120, "y": 1050}, {"x": 170, "y": 1050}, {"x": 220, "y": 1050}, {"x": 270, "y": 1050}, {"x": 320, "y": 1050}], "green": [{"x": 320, "y": 1050}, {"x": 370, "y": 1050}, {"x": 420, "y": 1050}, {"x": 470, "y": 1050}, {"x": 520, "y": 1050}], "yellow": [{"x": 520, "y": 1050}, {"x": 570, "y": 1050}, {"x": 620, "y": 1050}, {"x": 670, "y": 1050}, {"x": 720, "y": 1050}], "blue": [{"x": 720, "y": 1050}, {"x": 770, "y": 1050}, {"x": 820, "y": 1050}, {"x": 870, "y": 1050}, {"x": 920, "y": 1050}]};
@@ -428,6 +409,9 @@ const BARRS = ["n23", "n27", "n31", "n35", "n39", "n61", "n65", "n72", "n75", "n
 
 const NODE_BY_ID = Object.fromEntries(NODES.map(n=>[n.id,n]));
 const ADJ_SAFE = new Proxy(ADJ, { get: (t, k)=> t[k] || [] });
+
+// AJOUT : Fonction de sécurité pour éviter le blocage
+function getNodeById(id){ return NODE_BY_ID[id] || null; }
 
 const menu=document.getElementById('menu'), game=document.getElementById('game');
 const mName=document.getElementById('m_name'), mColor=document.getElementById('m_color'), mGame=document.getElementById('m_game');
@@ -492,8 +476,8 @@ function subscribe(id){
 
 function drawEdges(){ G_E.innerHTML=""; for(const [a,ns] of Object.entries(ADJ_SAFE)){ const A=NODE_BY_ID[a]; if(!A) continue; ns.forEach(b=>{ if(a>b) return; const B=NODE_BY_ID[b]; if(!B) return; const L=document.createElementNS("http://www.w3.org/2000/svg","line"); L.setAttribute("x1",A.x); L.setAttribute("y1",A.y); L.setAttribute("x2",B.x); L.setAttribute("y2",B.y); L.setAttribute("class","edge"); G_E.appendChild(L); }); } }
 function drawNodes(){ G_N.innerHTML=""; for(const n of NODES){ const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",n.x); c.setAttribute("cy",n.y); c.setAttribute("r","22"); c.setAttribute("class","node"); G_N.appendChild(c); } }
-function drawHomes(){ G_H.innerHTML=""; for(const [col,arr] of Object.entries(HOMES)){ arr.forEach(p=>{ const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",p.x); c.setAttribute("cy",p.y); c.setAttribute("r","18"); c.setAttribute("fill",COLORS[col]); c.setAttribute("opacity","0.3"); G_H.appendChild(c); }); } }
-function drawBarricades(list){ (list||[]).forEach(id=>{ const n=NODE_BY_ID[id]; if(!n) return; const b=document.createElementNS("http://www.w3.org/2000/svg","circle"); b.setAttribute("cx",n.x); b.setAttribute("cy",n.y); b.setAttribute("r","20"); b.setAttribute("class","barricade"); G_P.appendChild(b); }); }
+function drawHomes(){ G_H.innerHTML=""; for(const [col,arr] of Object.entries(HOMES)){ arr.forEach(p=>{ const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",p.x); c.setAttribute("cy",p.y); c.setAttribute("r","18"); c.setAttribute("fill",COLORS[col]); c.setAttribute("opacity","0.4"); G_H.appendChild(c); }); } }
+function drawBarricades(list){ (list||[]).forEach(id=>{ const n=NODE_BY_ID[id]; if(!n) return; const b=document.createElementNS("http://www.w3.org/2000/svg","circle"); b.setAttribute("cx",n.x); b.setAttribute("cy",n.y); b.setAttribute("r","18"); b.setAttribute("class","barricade"); G_P.appendChild(b); }); }
 
 function occByPlayer(players){ const map = new Map(); for(const [name,pl] of Object.entries(players)){ pl.pawns.forEach(p=>{ if(!p.atHome) map.set(p.pos, name); }); } return map; }
 function occSet(players){ return new Set([...occByPlayer(players).keys()]); }
@@ -502,10 +486,10 @@ function drawPawns(st){ for(const [name,pl] of Object.entries(st.players)){ for(
 
 function drawState(st){ 
   playersEl.innerHTML=""; Object.entries(st.players).forEach(([n,p])=>{ const d=document.createElement('div'); d.className='tag'; d.innerHTML=`<span class="dot" style="background:${COLORS[p.color]}"></span>${n}`; playersEl.appendChild(d); });
-  diceEl.textContent=(st.dice||"-"); 
+  diceEl.textContent=(st.dice||"—"); 
   const myTurn = st.order[st.turnIndex]===ME; 
   turnEl.textContent=(st.order[st.turnIndex]||"—")+(myTurn?" (Toi)":"");
-  turnEl.style.color = myTurn ? "var(--secondary)" : "inherit";
+  turnEl.style.color = myTurn ? "var(--btn-secondary)" : "inherit";
   
   G_E.innerHTML=""; G_N.innerHTML=""; G_H.innerHTML=""; G_P.innerHTML=""; G_UI.innerHTML="";
   const mergedBarr = Array.from(new Set([...(st.barricades||[]), ...LOCAL_BARR_ADDS]));
@@ -591,7 +575,7 @@ function addOriginHalo(x,y,onclick){
   G_UI.appendChild(o); 
 }
 
-function addSelectRing(x,y){ const s=document.createElementNS("http://www.w3.org/2000/svg","circle"); s.setAttribute("cx",x); s.setAttribute("cy",y); s.setAttribute("r","32"); s.setAttribute("class","select-ring"); s.setAttribute("style","fill:none;stroke:var(--secondary);stroke-width:4;"); s.setAttribute("data-role","select-ring"); G_UI.appendChild(s); }
+function addSelectRing(x,y){ const s=document.createElementNS("http://www.w3.org/2000/svg","circle"); s.setAttribute("cx",x); s.setAttribute("cy",y); s.setAttribute("r","32"); s.setAttribute("class","select-ring"); s.setAttribute("data-role","select-ring"); G_UI.appendChild(s); }
 function clearTargets(){ [...svg.querySelectorAll(".hint-target,[data-role='select-ring'],.hint-origin,.hint-label")].forEach(n=>n.remove()); }
 
 function addTargetHalo(x,y,onclick){ 
@@ -776,7 +760,7 @@ __attachVictoryWatcherWhenReady();
   function getBoardHost(){ return document.getElementById('game') || document.body; }
   function getBoardRect(){ const host = getBoardHost(); if (!host) return null; return host.getBoundingClientRect(); }
   function computeMapper(){
-    try{ if (!Array.isArray(NODES) || !NODES.length) return null; let minX=NODES[0].x, maxX=NODES[0].x, minY=NODES[0].y, maxY=NODES[0].y; for (let i=1;i<NODES.length;i++){ const n = NODES[i]; if (!n) continue; if (n.x < minX) minX = n.x; if (n.x > maxX) maxX = n.x; if (n.y < minY) minY = n.y; if (n.y > maxY) maxY = n.y; } const rect = getBoardRect(); if (!rect) return null; const sx = (maxX - minX) || 1; const sy = (maxY - minY) || 1; const kx = rect.width / sx; const ky = rect.height / sy; const k = Math.min(kx, ky); const offsetX = rect.left + window.scrollX + (rect.width - k * sx)/2; const offsetY = rect.top  + window.scrollY + (rect.height - k * sy)/2; return function toPx(pt){ return { x: offsetX + (pt.x - minX) * k, y: offsetY + (pt.y - minY) * k }; }; }; }catch(e){ console.error("mapper error", e); return null; }
+    try{ if (!Array.isArray(NODES) || !NODES.length) return null; let minX=NODES[0].x, maxX=NODES[0].x, minY=NODES[0].y, maxY=NODES[0].y; for (let i=1;i<NODES.length;i++){ const n = NODES[i]; if (!n) continue; if (n.x < minX) minX = n.x; if (n.x > maxX) maxX = n.x; if (n.y < minY) minY = n.y; if (n.y > maxY) maxY = n.y; } const rect = getBoardRect(); if (!rect) return null; const sx = (maxX - minX) || 1; const sy = (maxY - minY) || 1; const kx = rect.width / sx; const ky = rect.height / sy; const k = Math.min(kx, ky); const offsetX = rect.left + window.scrollX + (rect.width - k * sx)/2; const offsetY = rect.top  + window.scrollY + (rect.height - k * sy)/2; return function toPx(pt){ return { x: offsetX + (pt.x - minX) * k, y: offsetY + (pt.y - minY) * k }; }; }catch(e){ console.error("mapper error", e); return null; }
   }
   function placeClickCatcherAtGameCoord(coord, onhit){
     const map = computeMapper(); if (!map) return; const p = map(coord); const div = document.createElement('div'); div.className = 'home-click-catcher'; div.style.position = 'absolute'; div.style.left = (p.x - CATCHER_SIZE/2) + 'px'; div.style.top  = (p.y - CATCHER_SIZE/2) + 'px'; div.style.width = CATCHER_SIZE + 'px'; div.style.height = CATCHER_SIZE + 'px'; div.style.zIndex = 9998; div.style.background = 'transparent'; div.style.pointerEvents = 'auto'; div.style.touchAction = 'manipulation';
