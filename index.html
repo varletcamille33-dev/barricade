@@ -240,7 +240,7 @@
       stroke: #fff;
       stroke-width: 3;
       stroke-dasharray: 5,5;
-      animation: rotateRing 10s linear infinite;
+  
       cursor: pointer;
     }
     .hint-target {
@@ -248,7 +248,7 @@
       stroke: #55efc4;
       stroke-width: 4;
       cursor: pointer;
-      animation: pulse 1.5s infinite;
+    
     }
     .select-ring {
       fill: none;
@@ -262,8 +262,7 @@
       text-anchor: middle;
     }
 
-    @keyframes rotateRing { to { transform: rotate(360deg); transform-origin: center; } }
-    @keyframes pulse { 0% {r: 24px; opacity: 0.6;} 50% {r: 28px; opacity: 1;} 100% {r: 24px; opacity: 0.6;} }
+ 
 
     /* --- LOG & PLAYERS --- */
     #bottom-panel {
