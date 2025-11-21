@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Malefiz — Battle Edition (Contrast Fix)</title>
+  <title>Malefiz — Battle Edition (Desktop Fix)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -135,7 +135,7 @@
       color: #aaa;
     }
 
-    /* --- GAME UI LAYOUT --- */
+    /* --- GAME UI LAYOUT (MOBILE FIRST) --- */
     #game {
       width: 100%;
       height: 100%;
@@ -193,12 +193,12 @@
 
     @keyframes popIn { from {transform: scale(0.8); opacity: 0;} to {transform: scale(1); opacity: 1;} }
 
-    /* --- BOARD WRAPPER (CHANGEMENT COULEUR) --- */
+    /* --- BOARD WRAPPER --- */
     #wrap {
       flex: 1;
       overflow: hidden;
       border-radius: 24px;
-      background: var(--board-bg); /* FOND BLEU/VERT */
+      background: var(--board-bg); 
       border: 6px solid rgba(255,255,255,0.4);
       box-shadow: inset 0 0 40px rgba(0,0,0,0.1);
       position: relative;
@@ -213,42 +213,38 @@
     }
     #svg:active { cursor: grabbing; }
 
-    /* --- SVG ELEMENTS (CHANGEMENT CONTRASTE) --- */
+    /* --- SVG ELEMENTS --- */
     .edge { 
-      stroke: rgba(255,255,255,0.2); /* Chemins blancs légers */
+      stroke: rgba(255,255,255,0.2); 
       stroke-width: 8; 
       stroke-linecap: round; 
     }
     
     .node { 
-      fill: #ffffff; /* CASES BLANCHES PUR */
-      stroke: transparent; /* Pas de bordure ou très légère */
+      fill: #ffffff; 
+      stroke: transparent; 
       stroke-width: 0; 
       transition: fill 0.2s; 
     }
 
-    /* Barricade style "Boulet de canon" */
     .barricade { fill: #2d3436; stroke: #636e72; stroke-width: 2; filter: drop-shadow(2px 4px 3px rgba(0,0,0,0.3)); }
     
-    /* Pawns style "Glossy" */
     .pawn { stroke: rgba(255,255,255,0.8); stroke-width: 3; transition: transform 0.2s; paint-order: stroke; }
     .pawn-text { fill: #fff; font-weight: 700; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
 
     /* Interactive Hints */
     .hint-origin {
-      fill: rgba(255, 255, 255, 0.2); /* Halo blanc */
+      fill: rgba(255, 255, 255, 0.2);
       stroke: #fff;
       stroke-width: 3;
       stroke-dasharray: 5,5;
-  
       cursor: pointer;
     }
     .hint-target {
-      fill: rgba(85, 239, 196, 0.3); /* Vert menthe */
+      fill: rgba(85, 239, 196, 0.3);
       stroke: #55efc4;
       stroke-width: 4;
       cursor: pointer;
-    
     }
     .select-ring {
       fill: none;
@@ -261,8 +257,6 @@
       fill: var(--text-main);
       text-anchor: middle;
     }
-
- 
 
     /* --- LOG & PLAYERS --- */
     #bottom-panel {
@@ -306,6 +300,94 @@
     #winOverlay { backdrop-filter: blur(5px); background: rgba(0,0,0,0.2); }
     #winBox { box-shadow: 0 20px 60px rgba(0,0,0,0.15); border: none; }
     #winTitle { color: var(--primary); font-size: 2rem; }
+
+    /* ===========================================================
+       OPTIMISATION ORDINATEUR / DESKTOP (Large Screens)
+       =========================================================== */
+    @media (min-width: 1024px) {
+      #game {
+        /* Disposition en Grille : 
+           - Gauche : Plateau
+           - Droite : Interface (HUD + Logs)
+        */
+        display: grid;
+        grid-template-columns: 1fr 360px; /* Le plateau prend le reste, sidebar de 360px */
+        grid-template-rows: auto 1fr; /* HUD en haut, Logs en bas */
+        grid-template-areas: 
+          "board hud"
+          "board panel";
+        gap: 20px;
+        padding: 20px;
+        max-width: 1800px; /* Limite pour les écrans ultra-larges */
+        margin: 0 auto;
+      }
+
+      /* Le wrapper du plateau passe en mode pleine hauteur */
+      #wrap {
+        grid-area: board;
+        height: 100%;
+        max-height: 95vh; /* Utilise presque tout l'écran */
+        border-width: 8px;
+      }
+
+      /* La barre du haut (Dés, Tour) passe à droite */
+      .hud-bar {
+        grid-area: hud;
+        flex-direction: column; /* Empilement vertical */
+        align-items: stretch;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 0;
+        gap: 15px;
+        padding: 20px;
+      }
+
+      /* Réorganisation interne de la barre HUD */
+      .hud-bar .row {
+        flex-direction: column; /* Boutons l'un sous l'autre si besoin */
+        justify-content: center;
+        width: 100%;
+      }
+      .hud-bar button#roll {
+        width: 100%;
+        padding: 20px;
+        font-size: 1.2em;
+      }
+      .dice-container {
+        justify-content: center;
+        padding: 10px;
+      }
+      .turn-indicator {
+        margin-top: 5px;
+        font-size: 16px;
+      }
+
+      /* Le panneau du bas (Joueurs + Logs) passe en bas à droite */
+      #bottom-panel {
+        grid-area: panel;
+        flex-direction: column; /* Vertical */
+        height: auto; /* Remplit le reste de la colonne de droite */
+        margin-top: 0;
+        overflow: hidden;
+      }
+
+      .player-list {
+        flex-direction: row; /* Joueurs en grille horizontale */
+        flex-wrap: wrap;
+        min-width: 100%;
+        max-height: 150px;
+        margin-bottom: 15px;
+      }
+      .tag {
+        flex: 1 0 40%; /* 2 joueurs par ligne */
+        justify-content: center;
+      }
+
+      #log {
+        flex: 1; /* Prend tout l'espace restant en bas à droite */
+        font-size: 14px;
+      }
+    }
 
   </style>
 </head>
