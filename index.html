@@ -762,7 +762,7 @@ if(RST.started){ menu.style.display="none"; game.style.display="flex"; }
 }
 
 function drawEdges(){ G_E.innerHTML=""; for(const [a,ns] of Object.entries(ADJ_SAFE)){ const A=NODE_BY_ID[a]; if(!A) continue; ns.forEach(b=>{ if(a>b) return; const B=NODE_BY_ID[b]; if(!B) return; const L=document.createElementNS("http://www.w3.org/2000/svg","line"); L.setAttribute("x1",A.x); L.setAttribute("y1",A.y); L.setAttribute("x2",B.x); L.setAttribute("y2",B.y); L.setAttribute("class","edge"); G_E.appendChild(L); }); } }
-function drawNodes(){ G_N.innerHTML=""; for(const n of NODES){ const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",n.x); c.setAttribute("cy",n.y); c.setAttribute("r","22"); c.setAttribute("class","node"); const col=ENTRY_NODE_TO_COLOR[n.id]; if(col){ const hex=COLORS[col]||"#000000"; c.style.stroke=hex; c.style.strokeWidth="4px"; } G_N.appendChild(c); } }
+function drawNodes(){ G_N.innerHTML=""; for(const n of NODES){ const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",n.x); c.setAttribute("cy",n.y); c.setAttribute("r","22"); c.setAttribute("class","node"); const col=ENTRY_NODE_TO_COLOR[n.id]; if(col){ const hex=COLORS[col]||"#000000"; c.style.stroke=hex; c.style.strokeWidth="8px"; } G_N.appendChild(c); } }
 function drawHomes(){ G_H.innerHTML=""; for(const [col,arr] of Object.entries(HOMES)){ arr.forEach(p=>{ const c=document.createElementNS("http://www.w3.org/2000/svg","circle"); c.setAttribute("cx",p.x); c.setAttribute("cy",p.y); c.setAttribute("r","18"); c.setAttribute("fill",COLORS[col]); c.setAttribute("opacity","0.4"); G_H.appendChild(c); }); } }
 function drawBarricades(list){
   (list||[]).forEach(id=>{
