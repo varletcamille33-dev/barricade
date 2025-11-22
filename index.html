@@ -358,12 +358,17 @@
     <label>Qui es-tu ?</label>
     <div class="row">
       <input id="m_name" placeholder="Ton Pseudo" style="flex:2">
-      <select id="m_color" style="flex:1">
-        <option value="red"> 🔴</option>
-        <option value="blue"> 🔵</option>
-        <option value="green"> 🟢</option>
-        <option value="yellow"> 🟡</option>
-      </select>
+      <div id="color_selector_container" style="flex:1; display:flex; flex-direction:column;">
+        <select id="m_color">
+          <option value="red"> 🔴</option>
+          <option value="blue"> 🔵</option>
+          <option value="green"> 🟢</option>
+          <option value="yellow"> 🟡</option>
+        </select>
+        <span id="m_color_info_host" style="display:none; font-size:12px; color:#e17055; margin-top:4px; text-align:center;">
+            Couleurs Aléatoires activées.
+        </span>
+      </div>
     </div>
   </div>
 
@@ -376,6 +381,10 @@
 
   <div style="border-top: 2px dashed #eee; margin: 20px 0;"></div>
 
+  <div class="row" style="justify-content: center; margin-bottom: 12px;">
+      <button id="m_random_color" type="button">Couleurs Aléatoires : **Désactivé**</button>
+  </div>
+
   <div class="row" style="justify-content: center;">
     <button id="m_create" class="primary">✨ Créer partie</button>
     <button id="m_join">Rejoindre 🚀</button>
@@ -384,6 +393,10 @@
   <div id="lobby" style="display:none; margin-top:20px; background:#fcf9f2; padding:15px; border-radius:16px;">
     <div style="margin-bottom:8px; color:var(--text-light); font-size:0.9em;">Joueurs dans le salon :</div>
     <div id="lobbyList" class="row" style="gap:8px"></div>
+
+    <div id="m_color_info_joiner" style="display:none; margin-top:10px; text-align:center; color:#e17055; font-weight:600;">
+        L'hôte a choisi la distribution aléatoire des couleurs.
+    </div>
     
     <div class="row" style="margin-top:20px; justify-content:center; align-items:center; flex-direction:column; gap:10px">
       <button id="m_start" class="primary" style="width:100%">Démarrer le jeu !</button>
@@ -483,6 +496,13 @@ const diceEl=document.getElementById('diceVal');
 const turnEl=document.getElementById('turn'); const phaseEl=document.getElementById('phase'); const logEl=document.getElementById('log'); const logBodyEl=document.getElementById('logBody');
 const rollBtn = document.getElementById('roll');
 
+// NOUVEAUTÉ : Éléments du sélecteur aléatoire
+const mRandomColorBtn = document.getElementById('m_random_color');
+const mColorSelectorContainer = document.getElementById('color_selector_container');
+const mColorInfoHost = document.getElementById('m_color_info_host');
+const mColorInfoJoiner = document.getElementById('m_color_info_joiner');
+let IS_RANDOM_COLOR_MODE = false; // Nouvel état local
+
 const gameTimeEl = document.getElementById('gameTime');
 let gameTimerId = null;
 let gameStartedAtMs = null;
@@ -521,8 +541,25 @@ let ME="", MYCOLOR="red", gameRef=null, IS_HOST=false;
 let LOCAL_BARR_ADDS = new Set(); 
 let LOCAL_PLACE_DONE = false; 
 
-function blankState(){return{host:"",started:false,order:[],turnIndex:0,dice:0,winner:"",players:{},colors:{red:false,blue:false,green:false,yellow:false},barricades:[],logs:[]}};
-function ensure(st){ if(!st) st=blankState(); st.players=st.players||{}; st.colors=st.colors||{red:false,blue:false,green:false,yellow:false}; st.order=st.order||[]; st.barricades=st.barricades||[]; st.startedAt = st.startedAt || 0; st.logs = Array.isArray(st.logs) ? st.logs : []; return st; }
+// MODIFIÉ : Ajout de randomColorMode
+function blankState(){return{
+    host:"",started:false,order:[],turnIndex:0,dice:0,winner:"",
+    players:{},colors:{red:false,blue:false,green:false,yellow:false},
+    barricades:[],logs:[],
+    randomColorMode: false // NOUVEL ÉTAT
+}};
+// MODIFIÉ : Assure l'existence de randomColorMode
+function ensure(st){ 
+    if(!st) st=blankState(); 
+    st.players=st.players||{}; 
+    st.colors=st.colors||{red:false,blue:false,green:false,yellow:false}; 
+    st.order=st.order||[]; 
+    st.barricades=st.barricades||[]; 
+    st.startedAt = st.startedAt || 0; 
+    st.logs = Array.isArray(st.logs) ? st.logs : []; 
+    st.randomColorMode = st.randomColorMode || false; // NOUVEAU
+    return st; 
+}
 function log(t){
   if(!logBodyEl) return;
   LOG_LINES.unshift(`› ${t}`);
@@ -530,25 +567,138 @@ function log(t){
   logBodyEl.innerHTML = LOG_LINES.map(line => `<div>${line}</div>`).join("");
 }
 
-// MENU actions
-mCreate.onclick = async ()=>{ const id=mGame.value.trim(), name=mName.value.trim(), color=mColor.value; if(!id||!name) return alert("Pseudo + code");
-  ME=name; MYCOLOR=color; IS_HOST=true; gameRef=ref(db,"games/"+id);
-  await set(gameRef, blankState());
-  await runTransaction(gameRef,(st)=>{ st=ensure(st); st.host=name; st.players[name]={color,pawns:Array.from({length:5}).map(()=>({pos:"home",atHome:true})),won:false}; st.colors[color]=true; st.order=[name]; return st; });
-  subscribe(id); lobby.style.display="block";
-};
-mJoin.onclick = async ()=>{ const id=mGame.value.trim(), name=mName.value.trim(), color=mColor.value; if(!id||!name) return alert("Pseudo + code");
-  ME=name; MYCOLOR=color; IS_HOST=false; gameRef=ref(db,"games/"+id);
-  await runTransaction(gameRef,(st)=>{ st=ensure(st); if(st.started){alert("Partie déjà démarrée");return;} if(st.players[name]){alert("Pseudo déjà pris");return;} if(st.colors[color]){alert("Couleur déjà prise");return;} st.players[name]={color,pawns:Array.from({length:5}).map(()=>({pos:"home",atHome:true})),won:false}; st.colors[color]=true; st.order.push(name); return st; });
-  subscribe(id); lobby.style.display="block";
-};
-mStart.onclick = async ()=>{ if(!IS_HOST) return;
-  await runTransaction(gameRef,(st)=>{ st=ensure(st); if(Object.keys(st.players).length<2){alert("Au moins 2 joueurs"); return;} st.started=true; st.turnIndex=0; st.dice=0; st.winner=""; st.barricades=[...BARRS]; st._mustPlaceBarricade=false; st._placer=""; st.startedAt = Date.now(); return st; });
+// NOUVEAUTÉ : Gestion du mode aléatoire (Hôte seulement)
+mRandomColorBtn.onclick = () => {
+  if (!IS_HOST) return; // Seul l'hôte peut changer ce mode
+  IS_RANDOM_COLOR_MODE = !IS_RANDOM_COLOR_MODE;
+  mRandomColorBtn.textContent = `Couleurs Aléatoires : **${IS_RANDOM_COLOR_MODE ? 'Activé' : 'Désactivé'}**`;
+  
+  // Mettre à jour l'UI de l'hôte
+  mColor.disabled = IS_RANDOM_COLOR_MODE;
+  mColorInfoHost.style.display = IS_RANDOM_COLOR_MODE ? 'block' : 'none';
 };
 
+// MODIFIÉ : mCreate.onclick
+mCreate.onclick = async ()=>{ 
+    const id=mGame.value.trim(), name=mName.value.trim(), color=mColor.value; 
+    if(!id||!name) return alert("Pseudo + code");
+    ME=name; MYCOLOR=color; IS_HOST=true; gameRef=ref(db,"games/"+id);
+    await set(gameRef, blankState());
+    await runTransaction(gameRef,(st)=>{ 
+        st=ensure(st); 
+        st.host=name; 
+        st.randomColorMode = IS_RANDOM_COLOR_MODE; // ENREGISTRE L'ÉTAT ALÉATOIRE
+        st.players[name]={color,pawns:Array.from({length:5}).map(()=>({pos:"home",atHome:true})),won:false}; 
+        
+        // Réserve la couleur seulement si le mode aléatoire est DÉSACTIVÉ
+        if(!IS_RANDOM_COLOR_MODE) st.colors[color]=true; 
+        
+        st.order=[name]; 
+        return st; 
+    });
+    subscribe(id); lobby.style.display="block";
+};
+
+// MODIFIÉ : mJoin.onclick
+mJoin.onclick = async ()=>{ 
+    const id=mGame.value.trim(), name=mName.value.trim(), color=mColor.value; 
+    if(!id||!name) return alert("Pseudo + code");
+    ME=name; MYCOLOR=color; IS_HOST=false; gameRef=ref(db,"games/"+id);
+    await runTransaction(gameRef,(st)=>{ 
+        st=ensure(st); 
+        if(st.started){alert("Partie déjà démarrée");return;} 
+        if(st.players[name]){alert("Pseudo déjà pris");return;} 
+        
+        let joinColor = color;
+        if(st.randomColorMode){
+          // Si aléatoire, la couleur choisie est ignorée temporairement.
+          joinColor = 'red'; 
+          MYCOLOR = 'red'; // couleur locale temporaire
+        } else {
+          // Si pas aléatoire (mode normal), on vérifie et réserve la couleur
+          if(st.colors[color]){alert("Couleur déjà prise");return;} 
+          st.colors[color]=true; 
+          MYCOLOR = color; // Mise à jour de la couleur locale
+        }
+        
+        st.players[name]={color:joinColor,pawns:Array.from({length:5}).map(()=>({pos:"home",atHome:true})),won:false}; 
+        st.order.push(name); 
+        return st; 
+    });
+    subscribe(id); lobby.style.display="block";
+};
+
+// MODIFIÉ : mStart.onclick (Ajout de la logique d'attribution aléatoire)
+mStart.onclick = async ()=>{ if(!IS_HOST) return;
+  await runTransaction(gameRef,(st)=>{ 
+    st=ensure(st); 
+    if(Object.keys(st.players).length<2){alert("Au moins 2 joueurs"); return;} 
+    
+    // NOUVEAUTÉ : Logique d'attribution aléatoire
+    if (st.randomColorMode) {
+      const availableColors = ["red", "blue", "green", "yellow"];
+      
+      // Mélange de Fisher-Yates
+      for (let i = availableColors.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [availableColors[i], availableColors[j]] = [availableColors[j], availableColors[i]];
+      }
+      
+      const playerNames = st.order;
+      // Réinitialiser le pool de couleurs prises
+      st.colors = {red:false, blue:false, green:false, yellow:false}; 
+      
+      for(let i=0; i<playerNames.length; i++){
+        const playerName = playerNames[i];
+        // Utiliser l'opérateur modulo pour s'assurer qu'on reste dans les 4 couleurs
+        const color = availableColors[i % availableColors.length]; 
+        
+        if(st.players[playerName]) {
+          st.players[playerName].color = color; // ATTRIBUTION DÉFINITIVE
+          st.colors[color] = true; // Marquer comme pris
+        }
+        
+        // Journalise l'attribution
+        const msg = `🎉 ${playerName} a reçu la couleur ${color} !`;
+        st.logs.push(msg);
+      }
+    }
+    
+    st.started=true; st.turnIndex=0; st.dice=0; st.winner=""; st.barricades=[...BARRS]; st._mustPlaceBarricade=false; st._placer=""; st.startedAt = Date.now(); 
+    return st; 
+  });
+};
+
+// MODIFIÉ : subscribe
 function subscribe(id){
   onValue(ref(db,"games/"+id),(snap)=>{
     const st=ensure(snap.val());
+
+    // NOUVEAUTÉ : Gestion de l'UI pour le mode aléatoire
+    const isRandom = st.randomColorMode;
+    
+    // Le bouton aléatoire n'est visible que par l'hôte
+    mRandomColorBtn.style.display = IS_HOST ? 'block' : 'none'; 
+    if (IS_HOST) {
+      mRandomColorBtn.textContent = `Couleurs Aléatoires : **${isRandom ? 'Activé' : 'Désactivé'}**`;
+      IS_RANDOM_COLOR_MODE = isRandom; // Synchronise l'état local de l'hôte
+    }
+
+    // Désactive/Affiche le sélecteur de couleur et les messages
+    mColor.disabled = isRandom;
+    mColorInfoHost.style.display = (IS_HOST && isRandom) ? 'block' : 'none';
+    mColorInfoJoiner.style.display = (!IS_HOST && isRandom) ? 'block' : 'none';
+
+    // Rendre les couleurs déjà prises non sélectionnables (uniquement si le mode n'est pas aléatoire)
+    if (!isRandom) {
+      const myCurrentColor = st.players[ME]?.color || MYCOLOR;
+      for(const o of [...mColor.options]){
+        // Désactiver si la couleur est prise ET si ce n'est pas la couleur actuelle du joueur (pour qu'il puisse se re-sélectionner)
+        o.disabled = st.colors[o.value] === true && o.value !== myCurrentColor;
+      }
+    }
+
+
     if(st.barricades && st.barricades.length){
       for(const b of [...LOCAL_BARR_ADDS]){
         if(st.barricades.includes(b)) LOCAL_BARR_ADDS.delete(b);
@@ -560,7 +710,9 @@ function subscribe(id){
     }
     if(!st._mustPlaceBarricade){ LOCAL_PLACE_DONE = false; }
 
-    for(const o of [...mColor.options]) o.disabled = !!st.colors[o.value];
+    // MODIFIÉ : La désactivation du sélecteur de couleur est déplacée plus haut (dans le bloc NOUVEAUTÉ)
+    // for(const o of [...mColor.options]) o.disabled = !!st.colors[o.value]; // Ligne supprimée/déplacée
+    
     lobbyList.innerHTML=""; Object.entries(st.players).forEach(([n,p])=>{ const d=document.createElement('div'); d.className='tag'; d.innerHTML=`<span class="dot" style="background:${COLORS[p.color]}"></span>${n}`; lobbyList.appendChild(d); });
     if(RST.started){ menu.style.display="none"; game.style.display="flex"; }
     syncGameTimer(st);
